@@ -1,0 +1,20 @@
+# Node and build artifacts
+node_modules
+dist
+build
+coverage
+.next
+out
+
+# Husky internal folder
+.husky/_
+
+# Lock files and environment configs
+package-lock.json
+yarn.lock
+.env
+.env.local
+.env.production
+
+# Other ignored files
+*.log
