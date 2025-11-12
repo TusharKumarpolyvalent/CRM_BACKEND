@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "🔍 Checking commit message..."
+
+npx --no -- commitlint --edit "$1"
+
