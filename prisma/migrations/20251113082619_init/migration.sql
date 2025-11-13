@@ -1,0 +1,33 @@
+-- CreateTable
+CREATE TABLE `customerdata` (
+    `customerId` VARCHAR(15) NOT NULL,
+    `customerName` VARCHAR(50) NOT NULL,
+    `customerPhone` VARCHAR(10) NOT NULL,
+    `altPhone` VARCHAR(10) NULL,
+    `customerEmail` VARCHAR(30) NULL,
+    `customerCategory` VARCHAR(30) NULL,
+    `customerType` VARCHAR(1) NULL DEFAULT '0',
+    `gender` VARCHAR(8) NOT NULL,
+    `deliveryExeId` VARCHAR(10) NOT NULL,
+    `creditLimit` INTEGER NOT NULL DEFAULT 50,
+    `walletBalance` INTEGER NOT NULL DEFAULT 0,
+    `hubName` VARCHAR(20) NOT NULL,
+    `address1` VARCHAR(50) NOT NULL,
+    `address2` VARCHAR(50) NOT NULL,
+    `city` VARCHAR(20) NOT NULL,
+    `state` VARCHAR(20) NOT NULL,
+    `landmark` VARCHAR(20) NULL,
+    `location` VARCHAR(100) NOT NULL,
+    `pinCode` VARCHAR(20) NOT NULL,
+    `lat` DECIMAL(65, 30) NULL,
+    `log` DECIMAL(65, 30) NULL,
+    `platform` VARCHAR(20) NOT NULL,
+    `referralCode` VARCHAR(100) NULL,
+    `source` VARCHAR(20) NULL,
+    `status` VARCHAR(1) NULL DEFAULT '0',
+    `createdDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedDate` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `CustomerData_customerId_key`(`customerId`),
+    PRIMARY KEY (`customerPhone`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

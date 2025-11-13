@@ -2,6 +2,7 @@
   "name": "dairy-backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
@@ -22,6 +23,11 @@
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.4.0",
     "husky": "^9.1.7",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "prisma": "^6.19.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "dotenv": "^17.2.3"
   }
 }

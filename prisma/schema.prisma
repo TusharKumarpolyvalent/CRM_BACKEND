@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model customerdata {
+  customerId       String   @unique(map: "CustomerData_customerId_key") @db.VarChar(15)
+  customerName     String   @db.VarChar(50)
+  customerPhone    String   @id @db.VarChar(10)
+  altPhone         String?  @db.VarChar(10)
+  customerEmail    String?  @db.VarChar(30)
+  customerCategory String?  @db.VarChar(30)
+  customerType     String?  @default("0") @db.VarChar(1)
+  gender           String   @db.VarChar(8)
+  deliveryExeId    String   @db.VarChar(10)
+  creditLimit      Int      @default(50)
+  walletBalance    Int      @default(0)
+  hubName          String   @db.VarChar(20)
+  address1         String   @db.VarChar(50)
+  address2         String   @db.VarChar(50)
+  city             String   @db.VarChar(20)
+  state            String   @db.VarChar(20)
+  landmark         String?  @db.VarChar(20)
+  location         String   @db.VarChar(100)
+  pinCode          String   @db.VarChar(20)
+  lat              Decimal?
+  log              Decimal?
+  platform         String   @db.VarChar(20)
+  referralCode     String?  @db.VarChar(100)
+  source           String?  @db.VarChar(20)
+  status           String?  @default("0") @db.VarChar(1)
+  createdDate      DateTime @default(now())
+  updatedDate      DateTime @default(now())
+}
+
+model users{
+  userPhone String @db.VarChar(10) @unique
+  userPassword String
+  userId String @unique
+  lastName String @db.VarChar(20)
+  firstName String @db.VarChar(20)
+  userEmail String @db.VarChar(50)
+  status String @db.VarChar(1) @default("0")
+  role String @db.VarChar(20)
+  createdDate DateTime @default(now())
+  updatedDate DateTime @default(now())
+}
