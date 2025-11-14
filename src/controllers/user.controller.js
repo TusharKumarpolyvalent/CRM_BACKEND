@@ -2,9 +2,10 @@ const {
   validatePhone,
   validatePassword,
   validateEmail,
+  uniqueId,
 } = require('../utils/Constant');
-
-module.exports.createUser = (req, res) => {
+const service = require('../services/users.service');
+module.exports.addUser = async (req, res) => {
   try {
     const { userPhone, userPassword, lastName, firstName, userEmail, role } =
       req.body;
@@ -37,9 +38,19 @@ module.exports.createUser = (req, res) => {
       throw new Error(
         'Role must be minimum 3 characters and maximum 20 characters long'
       );
-
-    res.status(201).json({
+    // const userId = uniqueId().toString();/
+    const user = await service.createUser({
+      //   userId,
+      userPhone,
+      userPassword,
+      lastName,
+      firstName,
+      userEmail,
+      role,
+    });
+    return res.status(201).json({
       message: 'User created successfully',
+      data: user,
     });
   } catch (err) {
     res.status(500).json({
