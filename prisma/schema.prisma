@@ -41,7 +41,7 @@ model users{
   userPhone String @db.VarChar(10) @unique
   userPassword String
   userId String @unique
-  lastName String @db.VarChar(20)
+  lastName String? @db.VarChar(20)
   firstName String @db.VarChar(20)
   userEmail String @db.VarChar(50)
   status String @db.VarChar(1) @default("0")
