@@ -49,3 +49,17 @@ model users{
   createdDate DateTime @default(now())
   updatedDate DateTime @updatedAt
 }
+
+model hub_location_data {
+  locationId     String   @unique
+  location       String   @db.VarChar(50)
+  hubName        String   @db.VarChar(50)
+  deliveryExeId  String   @db.VarChar(20)
+  route          String   @db.VarChar(50)
+  status         String   @db.VarChar(1) @default("1")
+  createdDate    DateTime @default(now())
+  updatedDate    DateTime @updatedAt
+
+  @@id([location, hubName])
+}
+
