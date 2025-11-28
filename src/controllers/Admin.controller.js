@@ -2,6 +2,8 @@ const { createCampaign } = require('../services/Admin.service');
 
 module.exports.addCampaign = async (req, res) => {
   try {
+    console.log('Add campaign call');
+
     const {
       id,
       name,
