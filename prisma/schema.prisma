@@ -7,59 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model customerdata {
-  customerId       String   @unique(map: "CustomerData_customerId_key") @db.VarChar(15)
-  customerName     String   @db.VarChar(50)
-  customerPhone    String   @id @db.VarChar(10)
-  altPhone         String?  @db.VarChar(10)
-  customerEmail    String?  @db.VarChar(30)
-  customerCategory String?  @db.VarChar(30)
-  customerType     String?  @default("0") @db.VarChar(1)
-  gender           String   @db.VarChar(8)
-  deliveryExeId    String   @db.VarChar(10)
-  creditLimit      Int      @default(50)
-  walletBalance    Int      @default(0)
-  hubName          String   @db.VarChar(20)
-  address1         String   @db.VarChar(50)
-  address2         String   @db.VarChar(50)
-  city             String   @db.VarChar(20)
-  state            String   @db.VarChar(20)
-  landmark         String?  @db.VarChar(20)
-  location         String   @db.VarChar(100)
-  pinCode          String   @db.VarChar(20)
-  lat              Decimal?
-  log              Decimal?
-  platform         String   @db.VarChar(20)
-  referralCode     String?  @db.VarChar(100)
-  source           String?  @db.VarChar(20)
-  status           String?  @default("0") @db.VarChar(1)
-  createdDate      DateTime @default(now())
-  updatedDate      DateTime @default(now())
-}
+model Campaign {
+  id           String       @id      // manually provided, not autoincrement
+  name         String
+  client_name  String?
+  status       String?
+  description  String?
+  start_date   DateTime? @db.Date
+  end_date     DateTime? @db.Date
+  meta_date    DateTime? @db.Date
 
-model users{
-  userId Int @id @default(autoincrement())
-  userPhone String @db.VarChar(10) @unique
-  userPassword String
-  lastName String? @db.VarChar(20)
-  firstName String @db.VarChar(20)
-  userEmail String @db.VarChar(50)
-  status String @db.VarChar(1) @default("0")
-  role String @db.VarChar(20)
-  createdDate DateTime @default(now())
-  updatedDate DateTime @updatedAt
-}
-
-model hub_location_data {
-  locationId     String   @unique
-  location       String   @db.VarChar(50)
-  hubName        String   @db.VarChar(50)
-  deliveryExeId  String   @db.VarChar(20)
-  route          String   @db.VarChar(50)
-  status         String   @db.VarChar(1) @default("1")
-  createdDate    DateTime @default(now())
-  updatedDate    DateTime @updatedAt
-
-  @@id([location, hubName])
+  created_date   DateTime? @db.Date
+  updated_date DateTime @updatedAt @db.Timestamp(0)
 }
 
