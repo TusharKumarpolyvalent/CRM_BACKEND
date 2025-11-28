@@ -26,4 +26,4 @@ npm-debug.log*
 Thumbs.db
 
 /src/generated/prisma
-prisma
+/prisma/migrations/
