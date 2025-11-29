@@ -1,10 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const AdminRouter = require('./routes/admin.route');
 const AgentRouter = require('./routes/agent.route');
 
 const app = express();
-
+app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/admin', AdminRouter);
