@@ -5,7 +5,13 @@ const AdminRouter = require('./routes/admin.route');
 const AgentRouter = require('./routes/agent.route');
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
+);
 app.use(bodyParser.json());
 
 app.use('/admin', AdminRouter);

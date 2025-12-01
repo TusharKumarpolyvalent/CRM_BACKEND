@@ -11,13 +11,58 @@ model Campaign {
   id           String       @id      // manually provided, not autoincrement
   name         String
   client_name  String?
-  status       String?
+  status       String? @default("1")
   description  String?
   start_date   DateTime? @db.Date
   end_date     DateTime? @db.Date
   meta_date    DateTime? @db.Date
 
-  created_date   DateTime? @db.Date
-  updated_date DateTime @updatedAt @db.Timestamp(0)
+  created_at   DateTime? @db.Date
+  updated_at DateTime @updatedAt @db.Timestamp(0)
 }
+
+model Leads {
+  id           Int       @id @default(autoincrement())
+  campaign_id  String?
+  name         String
+  phone        String?
+  email        String?
+  city         String?
+  product      String?
+  source       String?
+  status       String?   @default("New")
+  assigned_to  String?
+  attempts     String       @default("0")
+  last_call    DateTime?
+  followup_at  DateTime?
+
+  doc_status   DocStatus @default(pending)
+  remarks      String?
+
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+}
+
+enum DocStatus {
+  pending
+  received
+  closed
+}
+
+model Users {
+  id         String   @id @default(uuid()) // Prisma prefers UUID for string primary keys
+  name       String   @db.VarChar(150)
+  email      String   @db.VarChar(150)
+  password   String   @db.VarChar(255)
+  role       Role     @default(agent)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+}
+
+enum Role {
+  admin
+  agent
+}
+
 
