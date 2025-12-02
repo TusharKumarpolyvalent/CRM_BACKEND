@@ -1,4 +1,8 @@
-const { fetchLead, updateLead } = require('../services/Agent.service');
+const {
+  fetchLeads,
+  updateLead,
+  fetchLead,
+} = require('../services/Agent.service');
 
 module.exports.fetchAgentLeads = async (req, res) => {
   try {
