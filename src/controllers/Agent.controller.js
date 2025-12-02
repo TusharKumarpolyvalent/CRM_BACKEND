@@ -23,11 +23,13 @@ module.exports.fetchAgentLeads = async (req, res) => {
 
 module.exports.leadFollowUp = async (req, res) => {
   try {
+    let docStatus = 'review';
     const { status, remark, lastcall } = req.body;
     const { leadId } = req.params;
     const lead = await fetchLead(parseInt(leadId));
     let n = parseInt(lead.attempts);
     ++n;
+    if (n === 3) docStatus = 'closed';
     if (n > 3) {
       return res.status(200).json({
         message: 'Lead update limit exceed',
@@ -40,6 +42,7 @@ module.exports.leadFollowUp = async (req, res) => {
       remark,
       lastcall,
       attempt,
+      docStatus,
     });
     return res.status(200).json({
       message: 'Lead update successfully',

@@ -14,7 +14,7 @@ module.exports.fetchLead = async (id) => {
 
 module.exports.updateLead = async (
   id,
-  { status, remark, lastcall, attempt }
+  { status, remark, lastcall, attempt, docStatus }
 ) => {
   return prisma.leads.update({
     where: { id: id },
@@ -23,6 +23,7 @@ module.exports.updateLead = async (
       remarks: remark,
       attempts: attempt,
       last_call: lastcall,
+      doc_status: docStatus,
     },
   });
 };
