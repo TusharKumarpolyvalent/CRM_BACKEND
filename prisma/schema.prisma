@@ -65,4 +65,16 @@ enum Role {
   agent
 }
 
+model LeadRecord {
+  id        String   @id
+  status1   String?
+  status2   String?
+  status3   String?
+  remark1   String?
+  remark2   String?
+  remark3   String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
 

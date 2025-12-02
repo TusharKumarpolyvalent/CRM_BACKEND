@@ -2,12 +2,15 @@ const express = require('express');
 const {
   fetchAgentLeads,
   leadFollowUp,
+  addLeadRecord,
 } = require('../controllers/Agent.controller');
 
 const AgentRouter = express.Router();
 
 AgentRouter.get('/get-leads', fetchAgentLeads);
 AgentRouter.post('/follow-up/:leadId', leadFollowUp);
+AgentRouter.post('/leadrecord/:leadId', addLeadRecord);
+
 AgentRouter.use('/', (req, res) => {
   res.status(200).json({
     message:
