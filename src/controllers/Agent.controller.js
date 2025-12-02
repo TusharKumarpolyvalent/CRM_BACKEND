@@ -24,6 +24,12 @@ module.exports.leadFollowUp = async (req, res) => {
     const lead = await fetchLead(parseInt(leadId));
     let n = parseInt(lead.attempts);
     ++n;
+    if (n > 3) {
+      return res.status(200).json({
+        message: 'Lead update limit exceed',
+        data: [],
+      });
+    }
     let attempt = n.toString();
     const updatedLead = await updateLead(parseInt(leadId), {
       status,
@@ -31,10 +37,14 @@ module.exports.leadFollowUp = async (req, res) => {
       lastcall,
       attempt,
     });
-    res.send(updatedLead);
+    return res.status(200).json({
+      message: 'Lead update successfully',
+      data: updatedLead,
+    });
   } catch (err) {
-    console.log(err.message);
-
-    res.send(err);
+    res.status(500).json({
+      message: 'Internal Server Error during lead follow up',
+      error: err.message,
+    });
   }
 };
