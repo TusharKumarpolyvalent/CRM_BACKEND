@@ -78,3 +78,15 @@ model LeadRecord {
 }
 
 
+model Activity {
+  activity_id          String   @id @default(uuid())
+  id          String   
+  description String
+  phone       String
+  agentId     String
+  created_at  DateTime @default(now())
+
+  // If Agent is a user model, you can add relation like:
+  // agent   User   @relation(fields: [agentId], references: [id])
+}
+

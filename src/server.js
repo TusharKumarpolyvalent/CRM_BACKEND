@@ -5,6 +5,7 @@ const cors = require('cors');
 const AdminRouter = require('./routes/admin.route');
 const AgentRouter = require('./routes/agent.route');
 const { userLogin } = require('./controllers/Auth.controller');
+const ActivityRouter = require('./routes/Activity.route');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/admin', AdminRouter);
 app.use('/agent', AgentRouter);
 
 app.post('/login', userLogin);
+app.use('/activity', ActivityRouter);
 
 app.use('/', (req, res) => {
   res.status(200).json({
