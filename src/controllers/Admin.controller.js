@@ -77,7 +77,7 @@ module.exports.addLeads = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({
-      message: 'Internal Server Error during adding leads',
+      message: 'Internal Server Error during adding Leads',
       error: err.message,
     });
   }
@@ -128,14 +128,14 @@ module.exports.getLeads = async (req, res) => {
   try {
     const { id, assigned } = req.query;
 
-    const leads = await fetchCampaignLeads(id, assigned);
+    const Leads = await fetchCampaignLeads(id, assigned);
     res.status(200).json({
       message: 'Leads fetched successfully',
-      data: leads,
+      data: Leads,
     });
   } catch (err) {
     res.status(500).json({
-      message: 'Internal Server Error during fetching leads',
+      message: 'Internal Server Error during fetching Leads',
       error: err.message,
     });
   }
@@ -187,7 +187,7 @@ module.exports.assignAgent = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({
-      message: 'Internal Server Error during assign leads',
+      message: 'Internal Server Error during assign Leads',
       error: err.message,
     });
   }

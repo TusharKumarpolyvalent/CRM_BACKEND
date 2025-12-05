@@ -7,7 +7,7 @@ const {
 
 const AgentRouter = express.Router();
 
-AgentRouter.get('/get-leads', fetchAgentLeads);
+AgentRouter.get('/get-Leads', fetchAgentLeads);
 AgentRouter.post('/follow-up/:leadId', leadFollowUp);
 AgentRouter.post('/leadrecord/:leadId', addLeadRecord);
 

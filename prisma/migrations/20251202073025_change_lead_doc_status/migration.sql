@@ -8,4 +8,4 @@
 ALTER TABLE `Campaign` ALTER COLUMN `updated_at` DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE `leads` MODIFY `doc_status` ENUM('pending', 'review', 'closed') NOT NULL DEFAULT 'pending';
+ALTER TABLE `Leads` MODIFY `doc_status` ENUM('pending', 'review', 'closed') NOT NULL DEFAULT 'pending';

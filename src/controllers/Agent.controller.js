@@ -10,14 +10,14 @@ module.exports.fetchAgentLeads = async (req, res) => {
   try {
     const { id } = req.query;
 
-    const leads = await fetchLeads(id);
+    const Leads = await fetchLeads(id);
     return res.status(200).json({
       message: 'Lead fetch successfully',
-      data: leads,
+      data: Leads,
     });
   } catch (err) {
     res.status(500).json({
-      message: 'Internal Server Error during fetch agent leads',
+      message: 'Internal Server Error during fetch agent Leads',
       error: err.message,
     });
   }
@@ -28,7 +28,7 @@ module.exports.leadFollowUp = async (req, res) => {
     let docStatus = 'review';
     const { status, remark, lastcall } = req.body;
     const { leadId } = req.params;
-    const lead = await fetchRecordWithId('leads', parseInt(leadId));
+    const lead = await fetchRecordWithId('Leads', parseInt(leadId));
     let n = parseInt(lead.attempts);
     ++n;
     if (n === 3) docStatus = 'closed';

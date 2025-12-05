@@ -6,7 +6,7 @@ module.exports.fetchRecordWithId = async (table, id) => {
   });
 };
 module.exports.fetchLeads = async (id) => {
-  return prisma.leads.findMany({
+  return prisma.Leads.findMany({
     where: { assigned_to: id },
   });
 };
@@ -15,7 +15,7 @@ module.exports.updateLead = async (
   id,
   { status, remark, lastcall, attempt, docStatus }
 ) => {
-  return prisma.leads.update({
+  return prisma.Leads.update({
     where: { id: id },
     data: {
       status: status,
