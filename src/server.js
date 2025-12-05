@@ -22,11 +22,11 @@ app.use(
 app.use(bodyParser.json());
 
 // ======= ROUTES =======
-app.use('/admin', AdminRouter);
-app.use('/agent', AgentRouter);
+app.use('/api/admin', AdminRouter);
+app.use('/api/agent', AgentRouter);
 
-app.post('/login', userLogin);
-app.use('/activity', ActivityRouter);
+app.post('/api/login', userLogin);
+app.use('/api/activity', ActivityRouter);
 
 app.use('/', (req, res) => {
   res.status(200).json({
