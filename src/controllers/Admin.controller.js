@@ -37,7 +37,7 @@ module.exports.addCampaign = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({
-      message: 'Internal Server Error during campaign creation',
+      message: 'Internal Server Error during Campaign creation',
       error: err.message,
     });
   }

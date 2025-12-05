@@ -5,7 +5,7 @@
 
 */
 -- AlterTable
-ALTER TABLE `campaign` ALTER COLUMN `updated_at` DROP DEFAULT;
+ALTER TABLE `Campaign` ALTER COLUMN `updated_at` DROP DEFAULT;
 
 -- AlterTable
 ALTER TABLE `leads` MODIFY `doc_status` ENUM('pending', 'review', 'closed') NOT NULL DEFAULT 'pending';

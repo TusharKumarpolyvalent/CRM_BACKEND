@@ -15,7 +15,7 @@ const AdminRouter = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-AdminRouter.post('/add-campaign', addCampaign);
+AdminRouter.post('/add-Campaign', addCampaign);
 AdminRouter.get('/get-campaigns', getCampaign);
 AdminRouter.post('/add-leads', addLeads);
 AdminRouter.post('/import-leads', upload.single('file'), importLeads);
