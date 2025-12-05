@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE `campaign` ALTER COLUMN `updated_date` DROP DEFAULT;
+ALTER TABLE `Campaign` ALTER COLUMN `updated_date` DROP DEFAULT;
 
 -- CreateTable
 CREATE TABLE `Leads` (
