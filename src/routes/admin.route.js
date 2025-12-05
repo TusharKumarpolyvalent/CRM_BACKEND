@@ -15,11 +15,11 @@ const AdminRouter = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-AdminRouter.post('/add-Campaign', addCampaign);
+AdminRouter.post('/add-campaign', addCampaign);
 AdminRouter.get('/get-campaigns', getCampaign);
-AdminRouter.post('/add-Leads', addLeads);
-AdminRouter.post('/import-Leads', upload.single('file'), importLeads);
-AdminRouter.get('/get-Leads', getLeads);
+AdminRouter.post('/add-leads', addLeads);
+AdminRouter.post('/import-leads', upload.single('file'), importLeads);
+AdminRouter.get('/get-leads', getLeads);
 AdminRouter.post('/add-user', addUser);
 AdminRouter.get('/get-user/:role', getUser);
 AdminRouter.post('/assign/:agentId', assignAgent);
