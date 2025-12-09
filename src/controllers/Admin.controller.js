@@ -102,9 +102,13 @@ module.exports.importLeads = async (req, res) => {
     const insertedLeads = [];
     for (const lead of leadsArray) {
       const leadobj = {
-        ...lead,
-        campaign_id: lead.campaign_id.toString(),
-        phone: lead.phone.toString(),
+        campaign_id: lead.campaign_id ? lead.campaign_id.toString() : '-',
+        name: lead.name ? lead.name.toString() : '-',
+        phone: lead.phone ? lead.phone.toString() : '-',
+        email: lead.email ? lead.email.toString() : '-',
+        city: lead.city ? lead.city.toString() : '-',
+        product: lead.product ? lead.product.toString() : '-',
+        source: lead.source ? lead.source.toString() : '-',
       };
       const savedLead = await createLeads(leadobj);
       insertedLeads.push(savedLead);

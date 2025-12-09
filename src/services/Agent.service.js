@@ -8,6 +8,7 @@ module.exports.fetchRecordWithId = async (table, id) => {
 module.exports.fetchLeads = async (id) => {
   return prisma.Leads.findMany({
     where: { assigned_to: id },
+    orderBy: { created_at: 'desc' },
   });
 };
 
