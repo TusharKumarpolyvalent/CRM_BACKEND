@@ -9,14 +9,17 @@ const ActivityRouter = require('./routes/Activity.route');
 
 const app = express();
 
-// ======= CORS CONFIGURATION =======
+// ======= CORS CONFIGURATION (FIRST) =======
 app.use(
   cors({
-    origin: 'http://localhost:5173', // allow your frontend
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'], // include custom headers if needed
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
+// ✅ THIS LINE FIXES PATCH ISSUE
+// app.options("*", cors());
 
 // ======= MIDDLEWARE =======
 app.use(bodyParser.json());
@@ -34,5 +37,4 @@ app.use('/', (req, res) => {
   });
 });
 
-// ======= EXPORT APP =======
 module.exports = app;

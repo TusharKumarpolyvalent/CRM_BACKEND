@@ -3,6 +3,7 @@ const {
   fetchAgentLeads,
   leadFollowUp,
   addLeadRecord,
+  updateLeadDetails,
 } = require('../controllers/Agent.controller');
 
 const AgentRouter = express.Router();
@@ -10,6 +11,7 @@ const AgentRouter = express.Router();
 AgentRouter.get('/get-leads', fetchAgentLeads);
 AgentRouter.post('/follow-up/:leadId', leadFollowUp);
 AgentRouter.post('/leadrecord/:leadId', addLeadRecord);
+AgentRouter.patch('/update-lead/:leadId', updateLeadDetails);
 
 AgentRouter.use('/', (req, res) => {
   res.status(200).json({

@@ -35,9 +35,10 @@ model Leads {
   attempts     String       @default("0")
   last_call    DateTime?
   followup_at  DateTime?
-
+  pincode      String  @default("")
   doc_status   DocStatus @default(pending)
   remarks      String?
+  reason       String  @default("")
 
   created_at   DateTime  @default(now())
   updated_at   DateTime  @updatedAt
