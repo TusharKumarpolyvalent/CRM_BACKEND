@@ -20,32 +20,49 @@ module.exports.createLeads = async (leadData) => {
   });
 };
 
-module.exports.fetchCampaignLeads = async (id, assigned) => {
+module.exports.fetchCampaignLeads = async (
+  id,
+  assigned,
+  date,
+  fromDate,
+  toDate
+) => {
+  const where = {
+    campaign_id: id,
+  };
+
+  // 🔥 ASSIGNED FILTER
   if (assigned === 'true') {
-    return await prisma.Leads.findMany({
-      where: {
-        campaign_id: id,
-        assigned_to: {
-          not: null,
-        },
-      },
-      orderBy: { created_at: 'desc' },
-    });
-  } else if (assigned === 'false')
-    return await prisma.Leads.findMany({
-      where: {
-        campaign_id: id,
-        assigned_to: null,
-      },
-      orderBy: { created_at: 'desc' },
-    });
-  else
-    return await prisma.Leads.findMany({
-      where: {
-        campaign_id: id,
-      },
-      orderBy: { created_at: 'desc' },
-    });
+    where.assigned_to = { not: null };
+  } else if (assigned === 'false') {
+    where.assigned_to = null;
+  }
+
+  // 🔥 DATE FILTERS
+  if (date) {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    where.created_at = {
+      gte: start,
+      lte: end,
+    };
+  }
+
+  if (fromDate && toDate) {
+    where.created_at = {
+      gte: new Date(fromDate),
+      lte: new Date(toDate),
+    };
+  }
+
+  return await prisma.Leads.findMany({
+    where,
+    orderBy: { created_at: 'desc' },
+  });
 };
 
 module.exports.createUser = async (userData) => {

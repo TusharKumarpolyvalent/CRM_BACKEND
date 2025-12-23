@@ -130,9 +130,16 @@ module.exports.importLeads = async (req, res) => {
 
 module.exports.getLeads = async (req, res) => {
   try {
-    const { id, assigned } = req.query;
+    const { id, assigned, date, fromDate, toDate } = req.query;
 
-    const Leads = await fetchCampaignLeads(id, assigned);
+    const Leads = await fetchCampaignLeads(
+      id,
+      assigned,
+      date,
+      fromDate,
+      toDate
+    );
+
     res.status(200).json({
       message: 'Leads fetched successfully',
       data: Leads,
