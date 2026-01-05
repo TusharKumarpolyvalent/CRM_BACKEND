@@ -62,6 +62,7 @@ model Leads {
   pincode     String           @default("")
   reason      String           @default("")
   reassign    String?
+  checkedclientlead Boolean  @default(false)
 }
 
 model Users {
