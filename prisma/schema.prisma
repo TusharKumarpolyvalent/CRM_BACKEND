@@ -7,89 +7,80 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Campaign {
-  id           String       @id      // manually provided, not autoincrement
-  name         String
-  client_name  String?
-  status       String? @default("1")
-  description  String?
-  start_date   DateTime? @db.Date
-  end_date     DateTime? @db.Date
-  meta_date    DateTime? @db.Date
-
-  created_at   DateTime? @db.Date
-  updated_at DateTime @updatedAt @db.Timestamp(0)
-}
-
-model Leads {
-  id           Int       @id @default(autoincrement())
-  campaign_id  String?
-  name         String
-  phone        String?
-  email        String?
-  city         String?
-  product      String?
-  source       String?
-  status       String?   @default("New")
-  assigned_to  String?
-  attempts     String       @default("0")
-  last_call    DateTime?
-  followup_at  DateTime?
-  pincode      String  @default("")
-  doc_status   DocStatus @default(pending)
-  remarks      String?
-  reason       String  @default("")
- passed_to_client  Boolean  @default(false) 
- reassign      String?
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-   
-}
-
-enum DocStatus {
-  pending
-  review
-  closed
-}
-
-model Users {
-  id         String   @id @default(uuid()) // Prisma prefers UUID for string primary keys
-  name       String   @db.VarChar(150)
-  email      String   @db.VarChar(150)
-  password   String   @db.VarChar(255)
-  role       Role     @default(agent)
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-
-}
-
-enum Role {
-  admin
-  agent
-}
-
-model LeadRecord {
-  id        String   @id
-  status1   String?
-  status2   String?
-  status3   String?
-  remark1   String?
-  remark2   String?
-  remark3   String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-}
-
-
-model Activity {
-  activity_id          String   @id @default(uuid())
-  id          String   
+model activity {
+  activity_id String   @id
+  id          String
   description String
   phone       String
   agentId     String
   created_at  DateTime @default(now())
-
-  // If Agent is a user model, you can add relation like:
-  // agent   User   @relation(fields: [agentId], references: [id])
 }
 
+model campaign {
+  id          String    @id
+  name        String
+  client_name String?
+  status      String?   @default("1")
+  description String?
+  start_date  DateTime? @db.Date
+  end_date    DateTime? @db.Date
+  meta_date   DateTime? @db.Date
+  created_at  DateTime? @db.Date
+  updated_at  DateTime  @default(now()) @db.Timestamp(0)
+}
+
+model leadrecord {
+  id         String   @id
+  status1    String?
+  status2    String?
+  status3    String?
+  remark1    String?
+  remark2    String?
+  remark3    String?
+  created_at DateTime @default(now())
+  updated_at DateTime
+}
+
+model leads {
+  id          Int              @id @default(autoincrement())
+  campaign_id String?
+  name        String
+  phone       String?
+  email       String?
+  city        String?
+  product     String?
+  source      String?
+  status      String?          @default("New")
+  assigned_to String?
+  attempts    String           @default("0")
+  last_call   DateTime?
+  followup_at DateTime?
+  doc_status  leads_doc_status @default(pending)
+  remarks     String?
+  created_at  DateTime         @default(now())
+  updated_at  DateTime
+  pincode     String           @default("")
+  reason      String           @default("")
+  reassign    String?
+}
+
+model users {
+  id         String     @id
+  name       String     @db.VarChar(150)
+  email      String     @db.VarChar(150)
+  password   String     @db.VarChar(255)
+  role       users_role @default(agent)
+  created_at DateTime   @default(now())
+  updated_at DateTime
+}
+
+enum users_role {
+  admin
+  agent
+}
+
+enum leads_doc_status {
+  pending
+  review
+  closed
+}
