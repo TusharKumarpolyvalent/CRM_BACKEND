@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model activity {
+model Activity {
   activity_id String   @id
   id          String
   description String
@@ -16,7 +16,7 @@ model activity {
   created_at  DateTime @default(now())
 }
 
-model campaign {
+model Campaign {
   id          String    @id
   name        String
   client_name String?
@@ -29,7 +29,7 @@ model campaign {
   updated_at  DateTime  @default(now()) @db.Timestamp(0)
 }
 
-model leadrecord {
+model Leadrecord {
   id         String   @id
   status1    String?
   status2    String?
@@ -41,7 +41,7 @@ model leadrecord {
   updated_at DateTime
 }
 
-model leads {
+model Leads {
   id          Int              @id @default(autoincrement())
   campaign_id String?
   name        String
@@ -64,7 +64,7 @@ model leads {
   reassign    String?
 }
 
-model users {
+model Users {
   id         String     @id
   name       String     @db.VarChar(150)
   email      String     @db.VarChar(150)
