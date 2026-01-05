@@ -7,6 +7,8 @@ const {
   createUser,
   fetchAllUsers,
   giveAgentToLeads,
+  deleteCampaignService,
+  updatePassedToClient,
 } = require('../services/Admin.service');
 
 module.exports.addCampaign = async (req, res) => {
@@ -200,6 +202,65 @@ module.exports.assignAgent = async (req, res) => {
     res.status(500).json({
       message: 'Internal Server Error during assign Leads',
       error: err.message,
+    });
+  }
+};
+
+module.exports.deleteCampaign = async (req, res) => {
+  try {
+    const id = req.params.id; // <-- define id here
+    console.log('Deleting campaign with id:', id);
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Campaign id is required' });
+    }
+
+    // call the service
+    const deleted = await deleteCampaignService(id);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Campaign deleted successfully',
+      data: deleted,
+    });
+  } catch (error) {
+    console.error('Delete campaign error:', error);
+
+    if (error.code === 'P2025') {
+      // Prisma error when record not found
+      return res
+        .status(404)
+        .json({ success: false, message: 'Campaign not found' });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to delete campaign',
+      error: error.message,
+    });
+  }
+};
+
+module.exports.passedToClient = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { passed_to_client } = req.body;
+
+    const updatedLead = await updatePassedToClient(id, passed_to_client);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Passed to client updated',
+      data: updatedLead,
+    });
+  } catch (error) {
+    console.error('passedToClient error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update passed to client',
+      error: error.message,
     });
   }
 };

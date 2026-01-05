@@ -100,4 +100,20 @@ module.exports.giveAgentToLeads = async (leadIds, agentId) => {
   });
 };
 
+module.exports.deleteCampaignService = async (id) => {
+  // delete all leads under this campaign first
+  await prisma.Leads.deleteMany({ where: { campaign_id: id } });
+
+  // then delete the campaign
+  return await prisma.Campaign.delete({ where: { id } });
+};
+
 //
+module.exports.updatePassedToClient = async (id, passed_to_client) => {
+  return prisma.Leads.update({
+    where: { id: Number(id) }, // 🔥 very important
+    data: {
+      passed_to_client: Boolean(passed_to_client),
+    },
+  });
+};

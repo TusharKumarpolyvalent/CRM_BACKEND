@@ -39,9 +39,10 @@ model Leads {
   doc_status   DocStatus @default(pending)
   remarks      String?
   reason       String  @default("")
-
+ passed_to_client  Boolean  @default(false) 
   created_at   DateTime  @default(now())
   updated_at   DateTime  @updatedAt
+   
 }
 
 enum DocStatus {
