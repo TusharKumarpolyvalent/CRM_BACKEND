@@ -63,7 +63,7 @@ model Leads {
   reason      String           @default("")
   reassign    String?
   checkedclientlead Boolean  @default(false)
-  agentname  String?
+  agentname_leads  String?
 }
 
 model Users {
