@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE `Campaign` ALTER COLUMN `updated_at` DROP DEFAULT;
+ALTER TABLE `campaign` ALTER COLUMN `updated_at` DROP DEFAULT;
