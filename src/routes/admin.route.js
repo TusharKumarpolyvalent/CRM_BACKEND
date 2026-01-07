@@ -10,7 +10,7 @@ const {
   getUser,
   assignAgent,
   deleteCampaign,
-  passedToClient,
+  checkedClientLead,
 } = require('../controllers/Admin.controller');
 
 const AdminRouter = express.Router();
@@ -25,7 +25,7 @@ AdminRouter.get('/get-leads', getLeads);
 AdminRouter.post('/add-user', addUser);
 AdminRouter.get('/get-user/:role', getUser);
 AdminRouter.post('/assign/:agentId', assignAgent);
-AdminRouter.post('/passed-to-client/:id', passedToClient);
+AdminRouter.post('/checked-client-lead/:id', checkedClientLead);
 
 AdminRouter.delete('/delete-campaign/:id', deleteCampaign);
 

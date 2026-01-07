@@ -8,7 +8,7 @@ const {
   fetchAllUsers,
   giveAgentToLeads,
   deleteCampaignService,
-  updatePassedToClient,
+  updateCheckedClientLead,
 } = require('../services/Admin.service');
 
 module.exports.addCampaign = async (req, res) => {
@@ -83,6 +83,10 @@ module.exports.addLeads = async (req, res) => {
       error: err.message,
     });
   }
+};
+module.exports.addUser = async (req, res) => {
+  console.log('🔥 ADD USER API HIT');
+  console.log('BODY:', req.body);
 };
 
 module.exports.importLeads = async (req, res) => {
@@ -243,23 +247,23 @@ module.exports.deleteCampaign = async (req, res) => {
   }
 };
 
-module.exports.passedToClient = async (req, res) => {
+module.exports.checkedClientLead = async (req, res) => {
   try {
     const { id } = req.params;
-    const { passed_to_client } = req.body;
+    const { checkedclientlead } = req.body;
 
-    const updatedLead = await updatePassedToClient(id, passed_to_client);
+    const updatedLead = await updateCheckedClientLead(id, checkedclientlead);
 
     return res.status(200).json({
       success: true,
-      message: 'Passed to client updated',
+      message: 'Checked client lead updated',
       data: updatedLead,
     });
   } catch (error) {
-    console.error('passedToClient error:', error);
+    console.error('checkedClientLead error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to update passed to client',
+      message: 'Failed to update checked client lead',
       error: error.message,
     });
   }

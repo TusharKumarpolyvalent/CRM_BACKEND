@@ -18,7 +18,7 @@ app.use(
   })
 );
 
-// ✅ THIS LINE FIXES PATCH ISSUE
+// THIS LINE FIXES PATCH ISSUE
 // app.options("*", cors());
 
 // ======= MIDDLEWARE =======

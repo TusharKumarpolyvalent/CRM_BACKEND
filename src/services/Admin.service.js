@@ -109,11 +109,11 @@ module.exports.deleteCampaignService = async (id) => {
 };
 
 //
-module.exports.updatePassedToClient = async (id, passed_to_client) => {
+module.exports.updateCheckedClientLead = async (id, checkedclientlead) => {
   return prisma.Leads.update({
-    where: { id: Number(id) }, // 🔥 very important
+    where: { id: Number(id) },
     data: {
-      passed_to_client: Boolean(passed_to_client),
+      checkedclientlead: Boolean(checkedclientlead),
     },
   });
 };

@@ -38,7 +38,8 @@ model Leadrecord {
   remark2    String?
   remark3    String?
   created_at DateTime @default(now())
-  updated_at DateTime
+  updated_at DateTime @default(now())
+
 }
 
 model Leads {
@@ -52,13 +53,15 @@ model Leads {
   source      String?
   status      String?          @default("New")
   assigned_to String?
+   assigned_at DateTime?   
   attempts    String           @default("0")
   last_call   DateTime?
   followup_at DateTime?
   doc_status  leads_doc_status @default(pending)
   remarks     String?
   created_at  DateTime         @default(now())
-  updated_at  DateTime
+ updated_at DateTime @default(now())
+
   pincode     String           @default("")
   reason      String           @default("")
   reassign    String?
@@ -73,7 +76,8 @@ model Users {
   password   String     @db.VarChar(255)
   role       users_role @default(agent)
   created_at DateTime   @default(now())
-  updated_at DateTime
+updated_at DateTime @default(now())
+
 }
 
 enum users_role {

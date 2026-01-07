@@ -41,10 +41,3 @@ module.exports.createLeadRecord = async (data) => {
     data: data,
   });
 };
-
-module.exports.updateLeads = async (id, data) => {
-  return prisma.Leads.update({
-    where: { id: id },
-    data: data,
-  });
-};
