@@ -24,36 +24,61 @@ module.exports.fetchAgentLeads = async (req, res) => {
   }
 };
 
+// agent.controller.js में
+// agent.controller.js में leadFollowUp function update करें
 module.exports.leadFollowUp = async (req, res) => {
   try {
-    let docStatus = 'review';
-    const { status, remark, lastcall, reason } = req.body;
+    const { status, remark, reason, last_call } = req.body; // ✅ last_call add करें
     const { leadId } = req.params;
-    const lead = await fetchRecordWithId('Leads', parseInt(leadId));
-    let n = parseInt(lead.attempts);
-    ++n;
-    if (n === 3) docStatus = 'closed';
-    if (n > 3) {
-      return res.status(200).json({
-        message: 'Lead update limit exceed',
-        data: [],
-      });
-    }
-    let attempt = n.toString();
-    const updatedLead = await updateLead(parseInt(leadId), {
+
+    console.log('📥 leadFollowUp request received:', {
+      leadId,
       status,
       remark,
-      lastcall,
-      attempt,
-      docStatus,
+      reason,
+      last_call,
+    });
+
+    const lead = await fetchRecordWithId('Leads', parseInt(leadId));
+
+    if (!lead) {
+      return res.status(404).json({
+        success: false,
+        message: `Lead ${leadId} not found`,
+      });
+    }
+
+    // ✅ unlimited attempts
+    const attempts = parseInt(lead.attempts || '0') + 1;
+
+    // ✅ Use provided last_call or current time
+    const lastcall = last_call ? new Date(last_call) : new Date();
+
+    await updateLead(parseInt(leadId), {
+      status,
+      remark,
+      lastcall, // ✅ यहाँ pass करें
+      attempt: attempts.toString(),
+      docStatus: 'review',
       reason,
     });
+
+    console.log('✅ Lead updated with last_call:', lastcall);
+
     return res.status(200).json({
-      message: 'Lead update successfully',
-      data: updatedLead,
+      success: true,
+      message: 'Follow-up saved successfully',
+      data: {
+        id: parseInt(leadId),
+        last_call: lastcall.toISOString(),
+        status,
+        attempts: attempts.toString(),
+      },
     });
   } catch (err) {
+    console.error('❌ Error in leadFollowUp:', err);
     res.status(500).json({
+      success: false,
       message: 'Internal Server Error during lead follow up',
       error: err.message,
     });
@@ -85,18 +110,64 @@ module.exports.addLeadRecord = async (req, res) => {
   }
 };
 
+// Agent.controller.js में change करें:
+
+// Agent.controller.js - updateLeadDetails fix karein
 module.exports.updateLeadDetails = async (req, res) => {
   try {
     const { leadId } = req.params;
-    const data = req.body;
+    const { status, reason, remarks, followupAt } = req.body;
 
-    const updatedLead = await updateLeads(parseInt(leadId), data);
+    console.log('🚀 updateLeadDetails called:', {
+      leadId: parseInt(leadId),
+      status,
+      reason,
+      remarks,
+      followupAt,
+    });
+
+    // Get current lead first to calculate attempts
+    const lead = await fetchRecordWithId('Leads', parseInt(leadId));
+
+    if (!lead) {
+      return res.status(404).json({
+        success: false,
+        message: `Lead ${leadId} not found`,
+      });
+    }
+
+    // Calculate attempts
+    const attempts = parseInt(lead.attempts || '0') + 1;
+
+    // Use updateLead function with correct parameters
+    const updatedLead = await updateLead(parseInt(leadId), {
+      status,
+      remark: remarks || '', // Pass as 'remark'
+      lastcall: new Date(),
+      attempt: attempts.toString(), // Provide attempt value
+      docStatus: 'review',
+      reason,
+    });
+
+    console.log('✅ Lead updated successfully:', {
+      id: updatedLead.id,
+      newStatus: updatedLead.status,
+      newAttempts: updatedLead.attempts,
+    });
+
     return res.status(200).json({
+      success: true,
       message: 'Lead updated successfully',
       data: updatedLead,
     });
   } catch (err) {
+    console.error('❌ Error in updateLeadDetails:', {
+      message: err.message,
+      stack: err.stack,
+      leadId: req.params.leadId,
+    });
     res.status(500).json({
+      success: false,
       message: 'Internal Server Error during lead update',
       error: err.message,
     });

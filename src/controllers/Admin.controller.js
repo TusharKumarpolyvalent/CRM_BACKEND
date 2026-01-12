@@ -138,6 +138,14 @@ module.exports.getLeads = async (req, res) => {
   try {
     const { id, assigned, date, fromDate, toDate } = req.query;
 
+    console.log('🚀 GET /get-leads API Called with:', {
+      id,
+      assigned,
+      date,
+      fromDate,
+      toDate,
+    });
+
     const Leads = await fetchCampaignLeads(
       id,
       assigned,
@@ -146,12 +154,18 @@ module.exports.getLeads = async (req, res) => {
       toDate
     );
 
+    console.log(`📊 Returning ${Leads.length} leads`);
+
+    // ✅ success: true add करें
     res.status(200).json({
+      success: true, // ❗ यह line add करें
       message: 'Leads fetched successfully',
       data: Leads,
     });
   } catch (err) {
+    console.error('❌ Error in getLeads:', err);
     res.status(500).json({
+      success: false, // ❗ success: false
       message: 'Internal Server Error during fetching Leads',
       error: err.message,
     });
@@ -191,24 +205,24 @@ module.exports.getUser = async (req, res) => {
   }
 };
 
-module.exports.assignAgent = async (req, res) => {
-  try {
-    const { agentId } = req.params;
-    const { leadIds } = req.body;
-    const parsedLeadIds = JSON.parse(leadIds);
+// module.exports.assignAgent = async (req, res) => {
+//   try {
+//     const { agentId } = req.params;
+//     const { leadIds } = req.body;
+//     const parsedLeadIds = JSON.parse(leadIds);
 
-    const assignedLeads = await giveAgentToLeads(parsedLeadIds, agentId);
-    return res.status(200).json({
-      message: 'Lead assigned successfully',
-      data: assignedLeads,
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: 'Internal Server Error during assign Leads',
-      error: err.message,
-    });
-  }
-};
+//     const assignedLeads = await giveAgentToLeads(parsedLeadIds, agentId);
+//     return res.status(200).json({
+//       message: 'Lead assigned successfully',
+//       data: assignedLeads,
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       message: 'Internal Server Error during assign Leads',
+//       error: err.message,
+//     });
+//   }
+// };
 
 module.exports.deleteCampaign = async (req, res) => {
   try {
@@ -265,6 +279,96 @@ module.exports.checkedClientLead = async (req, res) => {
       success: false,
       message: 'Failed to update checked client lead',
       error: error.message,
+    });
+  }
+};
+// Admin.controller.js में नीचे checkedClientLead के बाद add करें
+
+// module.exports.updateReassign = async (req, res) => {
+//   try {
+//     const { leadIds, reassignData } = req.body;
+
+//     const updatedLeads = await updateReassignService(leadIds, reassignData);
+
+//     return res.status(200).json({
+//       success: true,
+//       message: 'Reassign status updated successfully',
+//       data: updatedLeads,
+//     });
+//   } catch (error) {
+//     console.error('updateReassign error:', error);
+//     return res.status(500).json({
+//       success: false,
+//       message: 'Failed to update reassign status',
+//       error: error.message,
+//     });
+//   }
+// };
+
+// module.exports.clearReassign = async (req, res) => {
+//   try {
+//     const { leadId } = req.body;
+
+//     const updatedLead = await clearReassignService(leadId);
+
+//     return res.status(200).json({
+//       success: true,
+//       message: 'Reassign status cleared successfully',
+//       data: updatedLead,
+//     });
+//   } catch (error) {
+//     console.error('clearReassign error:', error);
+//     return res.status(500).json({
+//       success: false,
+//       message: 'Failed to clear reassign status',
+//       error: error.message,
+//     });
+//   }
+// };
+
+// assignAgent function को update करें
+// Admin.controller.js में assignAgent function को एक ही बार रखें:
+
+module.exports.assignAgent = async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const { leadIds, reassignData } = req.body;
+
+    console.log('🔍 AssignAgent called with:', {
+      agentId,
+      leadIds,
+      reassignData,
+    });
+
+    // Parse leadIds
+    let parsedLeadIds;
+    try {
+      parsedLeadIds =
+        typeof leadIds === 'string' ? JSON.parse(leadIds) : leadIds;
+    } catch (error) {
+      parsedLeadIds = leadIds; // If it's already an array
+    }
+
+    // अब giveAgentToLeads को reassignData भी pass करें
+    const assignedLeads = await giveAgentToLeads(
+      parsedLeadIds,
+      agentId,
+      reassignData
+    );
+
+    console.log(
+      `✅ Assigned ${parsedLeadIds.length} leads to agent ${agentId}`
+    );
+
+    return res.status(200).json({
+      message: 'Lead assigned successfully',
+      data: assignedLeads,
+    });
+  } catch (err) {
+    console.error('❌ Error in assignAgent:', err);
+    res.status(500).json({
+      message: 'Internal Server Error during assign Leads',
+      error: err.message,
     });
   }
 };

@@ -8,7 +8,7 @@ const { userLogin } = require('./controllers/Auth.controller');
 const ActivityRouter = require('./routes/Activity.route');
 
 const app = express();
-
+app.use(cors());
 // ======= CORS CONFIGURATION (FIRST) =======
 app.use(
   cors({

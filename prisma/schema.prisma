@@ -38,7 +38,7 @@ model Leadrecord {
   remark2    String?
   remark3    String?
   created_at DateTime @default(now())
-  updated_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
 }
 
@@ -60,7 +60,7 @@ model Leads {
   doc_status  leads_doc_status @default(pending)
   remarks     String?
   created_at  DateTime         @default(now())
- updated_at DateTime @default(now())
+ updated_at DateTime @updatedAt
 
   pincode     String           @default("")
   reason      String           @default("")
@@ -76,7 +76,7 @@ model Users {
   password   String     @db.VarChar(255)
   role       users_role @default(agent)
   created_at DateTime   @default(now())
-updated_at DateTime @default(now())
+updated_at DateTime @updatedAt
 
 }
 
