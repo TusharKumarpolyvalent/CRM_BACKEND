@@ -9,6 +9,8 @@ const {
   giveAgentToLeads,
   deleteCampaignService,
   updateCheckedClientLead,
+  updateReassignService,
+  clearReassignService,
 } = require('../services/Admin.service');
 
 module.exports.addCampaign = async (req, res) => {
@@ -284,47 +286,47 @@ module.exports.checkedClientLead = async (req, res) => {
 };
 // Admin.controller.js में नीचे checkedClientLead के बाद add करें
 
-// module.exports.updateReassign = async (req, res) => {
-//   try {
-//     const { leadIds, reassignData } = req.body;
+module.exports.updateReassign = async (req, res) => {
+  try {
+    const { leadIds, reassignData } = req.body;
 
-//     const updatedLeads = await updateReassignService(leadIds, reassignData);
+    const updatedLeads = await updateReassignService(leadIds, reassignData);
 
-//     return res.status(200).json({
-//       success: true,
-//       message: 'Reassign status updated successfully',
-//       data: updatedLeads,
-//     });
-//   } catch (error) {
-//     console.error('updateReassign error:', error);
-//     return res.status(500).json({
-//       success: false,
-//       message: 'Failed to update reassign status',
-//       error: error.message,
-//     });
-//   }
-// };
+    return res.status(200).json({
+      success: true,
+      message: 'Reassign status updated successfully',
+      data: updatedLeads,
+    });
+  } catch (error) {
+    console.error('updateReassign error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update reassign status',
+      error: error.message,
+    });
+  }
+};
 
-// module.exports.clearReassign = async (req, res) => {
-//   try {
-//     const { leadId } = req.body;
+module.exports.clearReassign = async (req, res) => {
+  try {
+    const { leadId } = req.body;
 
-//     const updatedLead = await clearReassignService(leadId);
+    const updatedLead = await clearReassignService(leadId);
 
-//     return res.status(200).json({
-//       success: true,
-//       message: 'Reassign status cleared successfully',
-//       data: updatedLead,
-//     });
-//   } catch (error) {
-//     console.error('clearReassign error:', error);
-//     return res.status(500).json({
-//       success: false,
-//       message: 'Failed to clear reassign status',
-//       error: error.message,
-//     });
-//   }
-// };
+    return res.status(200).json({
+      success: true,
+      message: 'Reassign status cleared successfully',
+      data: updatedLead,
+    });
+  } catch (error) {
+    console.error('clearReassign error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to clear reassign status',
+      error: error.message,
+    });
+  }
+};
 
 // assignAgent function को update करें
 // Admin.controller.js में assignAgent function को एक ही बार रखें:
