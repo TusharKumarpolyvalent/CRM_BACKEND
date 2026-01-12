@@ -55,8 +55,6 @@ module.exports.fetchCampaignLeads = async (
     console.log('👤 Default filter: unassigned');
   }
 
-  // 🔥 DATE FILTERS - IMPORTANT FIX!
-  // एक ही time में केवल एक date filter apply होना चाहिए
   if (date) {
     // Single date filter (for Today button)
     const start = new Date(date);
