@@ -122,18 +122,18 @@ module.exports.fetchAllUsers = async (role) => {
     });
 };
 
-module.exports.giveAgentToLeads = async (leadIds, agentId) => {
-  return prisma.Leads.updateMany({
-    where: {
-      id: {
-        in: leadIds,
-      },
-    },
-    data: {
-      assigned_to: agentId,
-    },
-  });
-};
+// module.exports.giveAgentToLeads = async (leadIds, agentId) => {
+//   return prisma.Leads.updateMany({
+//     where: {
+//       id: {
+//         in: leadIds,
+//       },
+//     },
+//     data: {
+//       assigned_to: agentId,
+//     },
+//   });
+// };
 
 module.exports.deleteCampaignService = async (id) => {
   // delete all leads under this campaign first
@@ -182,69 +182,35 @@ module.exports.clearReassignService = async (leadId) => {
 // Admin.service.js में giveAgentToLeads function update करें:
 
 module.exports.giveAgentToLeads = async (leadIds, agentId) => {
-  console.log('🔧 giveAgentToLeads FIXED called with:', {
-    leadIds,
-    agentId,
+  const leads = await prisma.Leads.findMany({
+    where: { id: { in: leadIds } },
+    select: { id: true, assigned_to: true },
   });
 
-  // 1️⃣ Fetch existing leads
-  const existingLeads = await prisma.Leads.findMany({
-    where: {
-      id: { in: leadIds },
-    },
-    select: {
-      id: true,
-      assigned_to: true,
-    },
-  });
-
-  // 2️⃣ Get agent name (only once)
   const agent = await prisma.Users.findUnique({
     where: { id: agentId },
     select: { name: true },
   });
 
-  const updates = existingLeads.map((lead) => {
-    // ✅ FIRST TIME ASSIGN → reassign = null
-    if (!lead.assigned_to) {
-      return prisma.Leads.update({
-        where: { id: lead.id },
-        data: {
-          assigned_to: agentId,
-          reassign: null,
-          updated_at: new Date(),
-        },
-      });
-    }
+  const updates = leads.map((lead) => {
+    const isSameAgent = lead.assigned_to === agentId;
 
-    // ✅ SAME AGENT → no reassign
-    if (lead.assigned_to === agentId) {
-      return prisma.Leads.update({
-        where: { id: lead.id },
-        data: {
-          assigned_to: agentId,
-          reassign: null,
-          updated_at: new Date(),
-        },
-      });
-    }
-
-    // 🔁 REAL REASSIGN (agent changed)
     return prisma.Leads.update({
       where: { id: lead.id },
       data: {
         assigned_to: agentId,
         reassign: JSON.stringify({
-          agentId,
-          agentName: agent?.name || 'Unknown',
+          previousAgentId: lead.assigned_to,
+          currentAgentId: agentId,
+          currentAgentName: agent?.name || 'Unknown',
+          sameAgent: isSameAgent, // 🔥 IMPORTANT
+          action: 'ASSIGN',
+          timestamp: new Date().toISOString(),
         }),
         updated_at: new Date(),
       },
     });
   });
 
-  const result = await Promise.all(updates);
-
-  console.log(`✅ Successfully processed ${result.length} leads`);
-  return result;
+  return Promise.all(updates);
 };

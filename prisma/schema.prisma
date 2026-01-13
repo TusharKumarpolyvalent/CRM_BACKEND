@@ -69,6 +69,7 @@ model Leads {
   reassign    String?
   checkedclientlead Boolean  @default(false)
   agentname_leads  String?
+  last_assigned_at DateTime?
 }
 
 model Users {
