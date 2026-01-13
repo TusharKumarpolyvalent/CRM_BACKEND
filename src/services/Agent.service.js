@@ -63,14 +63,14 @@ module.exports.updateLead = async (
   });
 };
 
-module.exports.updateLeadRecord = async (id, data) => {
+module.exports.updateLeadrecord = async (id, data) => {
   return prisma.LeadRecord.update({
     where: { id: id },
     data: data,
   });
 };
 
-module.exports.createLeadRecord = async (data) => {
+module.exports.createLeadrecord = async (data) => {
   return prisma.LeadRecord.create({
     data: data,
   });
