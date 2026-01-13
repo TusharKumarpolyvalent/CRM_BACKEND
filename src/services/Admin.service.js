@@ -193,20 +193,23 @@ module.exports.giveAgentToLeads = async (leadIds, agentId) => {
   });
 
   const updates = leads.map((lead) => {
+    const isFirstAssign = !lead.assigned_to;
     const isSameAgent = lead.assigned_to === agentId;
 
     return prisma.Leads.update({
       where: { id: lead.id },
       data: {
         assigned_to: agentId,
-        reassign: JSON.stringify({
-          previousAgentId: lead.assigned_to,
-          currentAgentId: agentId,
-          currentAgentName: agent?.name || 'Unknown',
-          sameAgent: isSameAgent, // 🔥 IMPORTANT
-          action: 'ASSIGN',
-          timestamp: new Date().toISOString(),
-        }),
+        reassign: isFirstAssign
+          ? null // ✅ first time assign → no reassign
+          : JSON.stringify({
+              previousAgentId: lead.assigned_to,
+              currentAgentId: agentId,
+              currentAgentName: agent?.name || 'Unknown',
+              sameAgent: isSameAgent,
+              action: 'ASSIGN',
+              timestamp: new Date().toISOString(),
+            }),
         updated_at: new Date(),
       },
     });
