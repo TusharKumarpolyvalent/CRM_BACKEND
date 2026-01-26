@@ -1,4 +1,5 @@
 const XLSX = require('xlsx');
+const prisma = require('../config/prisma');
 const {
   createCampaign,
   fetchAllCampaigns,
@@ -371,6 +372,161 @@ module.exports.assignAgent = async (req, res) => {
     res.status(500).json({
       message: 'Internal Server Error during assign Leads',
       error: err.message,
+    });
+  }
+};
+module.exports.getCampaignPerformance = async (req, res) => {
+  try {
+    const { campaign_id, fromDate, toDate } = req.query;
+
+    if (!campaign_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'campaign_id is required',
+      });
+    }
+
+    const where = { campaign_id };
+
+    if (fromDate && toDate) {
+      const start = new Date(fromDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(toDate);
+      end.setHours(23, 59, 59, 999);
+      where.created_at = { gte: start, lte: end };
+    }
+
+    // Prisma fetch
+    const leads = await prisma.Leads.findMany({
+      where,
+      select: {
+        source: true,
+        status: true, // status = 'qualified' / 'unqualified'
+      },
+    });
+
+    // Group by source
+    const performance = {};
+    leads.forEach((lead) => {
+      const src = lead.source || 'Unknown';
+      if (!performance[src]) performance[src] = { total: 0, qualified: 0 };
+      performance[src].total += 1;
+      if (lead.status && lead.status.toLowerCase() === 'qualified')
+        performance[src].qualified += 1;
+    });
+
+    const result = Object.keys(performance).map((source) => {
+      const { total, qualified } = performance[source];
+      return {
+        source_name: source,
+        total_leads: total,
+        total_qualified: qualified,
+        qualified_percent: total ? Math.round((qualified / total) * 100) : 0,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Campaign performance fetched successfully',
+      data: result,
+    });
+  } catch (err) {
+    console.error('❌ getCampaignPerformance error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports.getAgentPerformance = async (req, res) => {
+  try {
+    const { agent_id, fromDate, toDate } = req.query;
+
+    if (!agent_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'agentId is required',
+      });
+    }
+
+    const where = {
+      assigned_to: agent_id,
+    };
+
+    if (fromDate && toDate) {
+      where.created_at = {
+        gte: new Date(fromDate + 'T00:00:00'),
+        lte: new Date(toDate + 'T23:59:59'),
+      };
+    }
+
+    const leads = await prisma.Leads.findMany({
+      where,
+      select: {
+        status: true,
+        Campaign: { select: { name: true } },
+      },
+    });
+
+    const report = {};
+
+    leads.forEach((lead) => {
+      const campaign = lead.Campaign?.name || 'Unknown Campaign';
+
+      if (!report[campaign]) {
+        report[campaign] = {
+          total: 0,
+          connected: 0,
+          not_connected: 0,
+          qualified: 0,
+          not_qualified: 0,
+        };
+      }
+
+      const r = report[campaign];
+      r.total++;
+
+      switch (lead.status?.toLowerCase()) {
+        case 'connected':
+          r.connected++;
+          break;
+        case 'not connected':
+          r.not_connected++;
+          break;
+        case 'qualified':
+          r.qualified++;
+          break;
+        case 'not qualified':
+          r.not_qualified++;
+          break;
+      }
+    });
+
+    const result = Object.keys(report).map((campaign) => {
+      const r = report[campaign];
+      return {
+        campaign_name: campaign,
+        total_call_count: r.total,
+        connected: r.connected,
+        not_connected: r.not_connected,
+        qualified: r.qualified,
+        not_qualified: r.not_qualified,
+        connected_percent: r.total
+          ? Math.round((r.connected / r.total) * 100)
+          : 0,
+        not_connected_percent: r.total
+          ? Math.round((r.not_connected / r.total) * 100)
+          : 0,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error('❌ Agent performance error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

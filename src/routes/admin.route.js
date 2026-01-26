@@ -13,6 +13,8 @@ const {
   checkedClientLead,
   updateReassign,
   clearReassign,
+  getCampaignPerformance,
+  getAgentPerformance,
 } = require('../controllers/Admin.controller');
 
 const AdminRouter = express.Router();
@@ -30,6 +32,8 @@ AdminRouter.post('/assign/:agentId', assignAgent);
 AdminRouter.post('/update-reassign', updateReassign);
 AdminRouter.post('/clear-reassign', clearReassign);
 AdminRouter.post('/checked-client-lead/:id', checkedClientLead);
+AdminRouter.get('/campaign-performance', getCampaignPerformance);
+AdminRouter.get('/agent-performance', getAgentPerformance);
 
 AdminRouter.delete('/delete-campaign/:id', deleteCampaign);
 
