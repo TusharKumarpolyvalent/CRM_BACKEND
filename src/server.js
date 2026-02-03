@@ -19,7 +19,7 @@ app.use(
 );
 
 // THIS LINE FIXES PATCH ISSUE
-// app.options("*", cors());
+// app.options("/", cors());
 
 // ======= MIDDLEWARE =======
 app.use(bodyParser.json());
