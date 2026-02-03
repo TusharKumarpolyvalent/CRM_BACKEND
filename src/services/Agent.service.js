@@ -62,6 +62,15 @@ module.exports.updateLead = async (
     return updatedLead;
   });
 };
+module.exports.updateLeadAddress = async (leadId, data) => {
+  return prisma.Leads.update({
+    where: { id: leadId },
+    data: {
+      ...(data.city && { city: data.city }),
+      ...(data.pincode && { pincode: data.pincode }),
+    },
+  });
+};
 
 module.exports.updateLeadrecord = async (id, data) => {
   return prisma.LeadRecord.update({
@@ -89,6 +98,9 @@ module.exports.updateLeads = async (leadId, data) => {
         reason: data.reason,
         last_call: new Date(),
       };
+      if (data.city) updateData.city = data.city;
+      if (data.pincode) updateData.pincode = data.pincode;
+      if (data.name) updateData.name = data.name;
 
       // Add followup_at if provided
       if (data.followupAt) {

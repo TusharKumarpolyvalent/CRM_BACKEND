@@ -51,7 +51,7 @@ model Leads {
   name        String
   phone       String?
   email       String?
-  city        String?
+  city String? @db.LongText
   product     String?
   source      String?
   status      String?          @default("New")

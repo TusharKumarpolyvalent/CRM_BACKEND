@@ -26,6 +26,38 @@ module.exports.fetchAgentLeads = async (req, res) => {
 
 // agent.controller.js में
 // agent.controller.js में leadFollowUp function update करें
+
+module.exports.updateLeadAddress = async (req, res) => {
+  try {
+    const { leadId } = req.params;
+    const { city, pincode } = req.body;
+
+    if (!city && !pincode) {
+      return res.status(400).json({
+        success: false,
+        message: 'City or Pincode required',
+      });
+    }
+
+    const updatedLead = await updateLeads(parseInt(leadId), {
+      city,
+      pincode,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Lead address updated successfully',
+      data: updatedLead,
+    });
+  } catch (err) {
+    console.error('❌ updateLeadAddress error:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update lead address',
+    });
+  }
+};
+
 module.exports.leadFollowUp = async (req, res) => {
   try {
     const { status, remark, reason, last_call } = req.body; // ✅ last_call add करें
