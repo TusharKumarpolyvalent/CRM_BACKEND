@@ -57,10 +57,12 @@ module.exports.fetchCampaignLeads = async (
 
   if (date) {
     // Single date filter (for Today button)
-    const start = new Date(date);
+    // Parse YYYY-MM-DD as local date to avoid timezone shift (off-by-one)
+    const [sy, sm, sd] = date.split('-').map((v) => Number(v));
+    const start = new Date(sy, sm - 1, sd);
     start.setHours(0, 0, 0, 0);
 
-    const end = new Date(date);
+    const end = new Date(sy, sm - 1, sd);
     end.setHours(23, 59, 59, 999);
 
     where.created_at = {
@@ -68,13 +70,17 @@ module.exports.fetchCampaignLeads = async (
       lte: end,
     };
 
-    console.log('📅 Applied single date filter:', date);
+    console.log('📅 Applied single date filter (local):', date);
   } else if (fromDate && toDate) {
     // Date range filter (for From-To)
-    const start = new Date(fromDate);
+    // Parse both dates as local dates
+    const [fy, fm, fd] = fromDate.split('-').map((v) => Number(v));
+    const [ty, tm, td] = toDate.split('-').map((v) => Number(v));
+
+    const start = new Date(fy, fm - 1, fd);
     start.setHours(0, 0, 0, 0);
 
-    const end = new Date(toDate);
+    const end = new Date(ty, tm - 1, td);
     end.setHours(23, 59, 59, 999);
 
     where.created_at = {
@@ -82,7 +88,12 @@ module.exports.fetchCampaignLeads = async (
       lte: end,
     };
 
-    console.log('📅 Applied date range filter:', fromDate, 'to', toDate);
+    console.log(
+      '📅 Applied date range filter (local):',
+      fromDate,
+      'to',
+      toDate
+    );
   }
   // अगर कोई date filter नहीं है, तो सभी dates के leads return करें
   else {

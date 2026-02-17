@@ -389,11 +389,15 @@ module.exports.getCampaignPerformance = async (req, res) => {
     const where = { campaign_id };
 
     if (fromDate && toDate) {
-      const start = new Date(fromDate);
+      // Parse YYYY-MM-DD as local date to avoid timezone shift
+      const [fy, fm, fd] = fromDate.split('-').map((v) => Number(v));
+      const [ty, tm, td] = toDate.split('-').map((v) => Number(v));
+
+      const start = new Date(fy, fm - 1, fd);
       start.setHours(0, 0, 0, 0);
-      const end = new Date(toDate);
+      const end = new Date(ty, tm - 1, td);
       end.setHours(23, 59, 59, 999);
-      where.created_at = { gte: start, lte: end };
+      where.last_call = { gte: start, lte: end };
     }
 
     // Prisma fetch
@@ -436,6 +440,7 @@ module.exports.getCampaignPerformance = async (req, res) => {
   }
 };
 
+// Admin.controller.js mein getAgentPerformance function replace karo
 module.exports.getAgentPerformance = async (req, res) => {
   try {
     const { agent_id, fromDate, toDate } = req.query;
@@ -443,90 +448,159 @@ module.exports.getAgentPerformance = async (req, res) => {
     if (!agent_id) {
       return res.status(400).json({
         success: false,
-        message: 'agentId is required',
+        message: 'agent_id is required',
       });
     }
 
-    const where = {
-      assigned_to: agent_id,
-    };
-
+    // Date range prepare karo
+    let startDate, endDate;
     if (fromDate && toDate) {
-      where.created_at = {
-        gte: new Date(fromDate + 'T00:00:00'),
-        lte: new Date(toDate + 'T23:59:59'),
-      };
+      startDate = new Date(fromDate);
+      endDate = new Date(toDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
     }
 
-    const leads = await prisma.Leads.findMany({
-      where,
-      select: {
-        status: true,
-        Campaign: { select: { name: true } },
+    console.log('🔍 Fetching calls for agent:', { agent_id, fromDate, toDate });
+
+    // ✅ FIX: "lead" use karo (lowercase L)
+    const callLogs = await prisma.CallLog.findMany({
+      where: {
+        agent_id: agent_id,
+        ...(startDate && endDate
+          ? {
+              called_at: {
+                gte: startDate,
+                lte: endDate,
+              },
+            }
+          : {}),
+      },
+      include: {
+        lead: {
+          // 👈 YAHAN "lead" (lowercase L)
+          include: {
+            Campaign: true,
+          },
+        },
+      },
+      orderBy: {
+        called_at: 'desc',
       },
     });
 
-    const report = {};
+    console.log(`📞 Agent ${agent_id} ne ${callLogs.length} total calls kiye`);
 
-    leads.forEach((lead) => {
-      const campaign = lead.Campaign?.name || 'Unknown Campaign';
+    // Campaign-wise grouping
+    const campaignMap = new Map();
+    let totalConnected = 0;
+    let totalNotConnected = 0;
+    let totalQualified = 0;
+    let totalNotQualified = 0;
 
-      if (!report[campaign]) {
-        report[campaign] = {
-          total: 0,
+    callLogs.forEach((log) => {
+      // ✅ FIX: log.lead use karo (log.Lead nahi)
+      const campaignName = log.lead?.Campaign?.name || 'Unknown Campaign';
+      const leadStatus = log.lead?.status || 'unknown';
+
+      if (!campaignMap.has(campaignName)) {
+        campaignMap.set(campaignName, {
+          campaign_name: campaignName,
+          total_call_count: 0,
           connected: 0,
           not_connected: 0,
           qualified: 0,
           not_qualified: 0,
-        };
+        });
       }
 
-      const r = report[campaign];
-      r.total++;
+      const campaign = campaignMap.get(campaignName);
+      campaign.total_call_count++;
 
-      switch (lead.status?.toLowerCase()) {
-        case 'connected':
-          r.connected++;
-          break;
-        case 'not connected':
-          r.not_connected++;
-          break;
-        case 'qualified':
-          r.qualified++;
-          break;
-        case 'not qualified':
-          r.not_qualified++;
-          break;
+      // Status count
+      const status = (leadStatus || '').toLowerCase();
+      if (status.includes('connected') || status === 'connected') {
+        campaign.connected++;
+        totalConnected++;
+      } else if (
+        status.includes('not connected') ||
+        status === 'not connected'
+      ) {
+        campaign.not_connected++;
+        totalNotConnected++;
+      } else if (status.includes('qualified') || status === 'qualified') {
+        campaign.qualified++;
+        totalQualified++;
+      } else if (
+        status.includes('not qualified') ||
+        status === 'not qualified'
+      ) {
+        campaign.not_qualified++;
+        totalNotQualified++;
       }
     });
 
-    const result = Object.keys(report).map((campaign) => {
-      const r = report[campaign];
-      return {
-        campaign_name: campaign,
-        total_call_count: r.total,
-        connected: r.connected,
-        not_connected: r.not_connected,
-        qualified: r.qualified,
-        not_qualified: r.not_qualified,
-        connected_percent: r.total
-          ? Math.round((r.connected / r.total) * 100)
-          : 0,
-        not_connected_percent: r.total
-          ? Math.round((r.not_connected / r.total) * 100)
-          : 0,
-      };
-    });
+    const campaignWise = Array.from(campaignMap.values());
+    const totalCalls = callLogs.length;
 
     return res.status(200).json({
       success: true,
-      data: result,
+      data: {
+        campaign_wise: campaignWise,
+        summary: {
+          total_calls: totalCalls,
+          connected: totalConnected,
+          not_connected: totalNotConnected,
+          qualified: totalQualified,
+          not_qualified: totalNotQualified,
+        },
+      },
     });
   } catch (error) {
     console.error('❌ Agent performance error:', error);
     return res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+module.exports.getDailyCallCount = async (req, res) => {
+  try {
+    const { agentId, date } = req.query;
+
+    if (!agentId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: 'agentId and date are required',
+      });
+    }
+
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const count = await prisma.CallLog.count({
+      where: {
+        agent_id: agentId.toString(),
+        called_at: {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+
+    return res.json({
+      success: true,
+      count,
+    });
+  } catch (error) {
+    console.error('❌ Daily Call Count Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error fetching daily call count',
     });
   }
 };

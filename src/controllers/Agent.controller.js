@@ -1,3 +1,5 @@
+const prisma = require('../config/prisma');
+
 const {
   fetchLeads,
   updateLead,
@@ -30,18 +32,19 @@ module.exports.fetchAgentLeads = async (req, res) => {
 module.exports.updateLeadAddress = async (req, res) => {
   try {
     const { leadId } = req.params;
-    const { city, pincode } = req.body;
+    const { city, pincode, name } = req.body;
 
-    if (!city && !pincode) {
+    if (!city && !pincode && !name) {
       return res.status(400).json({
         success: false,
-        message: 'City or Pincode required',
+        message: 'City or Pincode or Name required',
       });
     }
 
     const updatedLead = await updateLeads(parseInt(leadId), {
       city,
       pincode,
+      name,
     });
 
     return res.status(200).json({
@@ -57,19 +60,50 @@ module.exports.updateLeadAddress = async (req, res) => {
     });
   }
 };
+module.exports.dailyCallCount = async (req, res) => {
+  try {
+    const { agentId, date } = req.query;
+
+    if (!agentId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: 'agentId and date are required',
+      });
+    }
+
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const count = await prisma.CallLog.count({
+      where: {
+        agent_id: agentId.toString(),
+        called_at: {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      count,
+    });
+  } catch (err) {
+    console.error('❌ dailyCallCount error:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching daily call count',
+    });
+  }
+};
 
 module.exports.leadFollowUp = async (req, res) => {
   try {
-    const { status, remark, reason, last_call } = req.body; // ✅ last_call add करें
+    const { status, remark, reason, last_call } = req.body;
     const { leadId } = req.params;
-
-    console.log('📥 leadFollowUp request received:', {
-      leadId,
-      status,
-      remark,
-      reason,
-      last_call,
-    });
 
     const lead = await fetchRecordWithId('Leads', parseInt(leadId));
 
@@ -80,32 +114,19 @@ module.exports.leadFollowUp = async (req, res) => {
       });
     }
 
-    // ✅ unlimited attempts
-    const attempts = parseInt(lead.attempts || '0') + 1;
-
-    // ✅ Use provided last_call or current time
     const lastcall = last_call ? new Date(last_call) : new Date();
 
     await updateLead(parseInt(leadId), {
       status,
       remark,
-      lastcall, // ✅ यहाँ pass करें
-      attempt: attempts.toString(),
+      lastcall,
       docStatus: 'review',
       reason,
     });
 
-    console.log('✅ Lead updated with last_call:', lastcall);
-
     return res.status(200).json({
       success: true,
       message: 'Follow-up saved successfully',
-      data: {
-        id: parseInt(leadId),
-        last_call: lastcall.toISOString(),
-        status,
-        attempts: attempts.toString(),
-      },
     });
   } catch (err) {
     console.error('❌ Error in leadFollowUp:', err);
@@ -169,14 +190,13 @@ module.exports.updateLeadDetails = async (req, res) => {
     }
 
     // Calculate attempts
-    const attempts = parseInt(lead.attempts || '0') + 1;
+    // const attempts = parseInt(lead.attempts || '0') + 1;
 
     // Use updateLead function with correct parameters
     const updatedLead = await updateLead(parseInt(leadId), {
       status,
-      remark: remarks || '', // Pass as 'remark'
+      remark: remarks || '',
       lastcall: new Date(),
-      attempt: attempts.toString(), // Provide attempt value
       docStatus: 'review',
       reason,
     });

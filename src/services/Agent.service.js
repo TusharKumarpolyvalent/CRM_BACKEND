@@ -23,10 +23,18 @@ module.exports.updateLead = async (
       data: {
         status,
         remarks: remark,
-        attempts: attempt,
+        attempts: { increment: 1 },
+
         last_call: lastcall,
         doc_status: docStatus,
         reason,
+      },
+    });
+    await tx.CallLog.create({
+      data: {
+        lead_id: id,
+        agent_id: updatedLead.assigned_to,
+        called_at: new Date(),
       },
     });
 
@@ -113,9 +121,9 @@ module.exports.updateLeads = async (leadId, data) => {
       });
 
       if (currentLead) {
-        updateData.attempts = (
-          parseInt(currentLead.attempts || '0') + 1
-        ).toString();
+        updateData.attempts = {
+          increment: 1,
+        };
       }
 
       const updatedLead = await tx.Leads.update({
