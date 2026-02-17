@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE `leads` ADD COLUMN `assigned_at` DATETIME(3) NULL;
+ALTER TABLE `Leads` ADD COLUMN `assigned_at` DATETIME(3) NULL;

@@ -5,14 +5,14 @@
 
 */
 -- AlterTable
-ALTER TABLE `leadrecord` ALTER COLUMN `updated_at` DROP DEFAULT;
+ALTER TABLE `LeadRecord` ALTER COLUMN `updated_at` DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE `leads` MODIFY `attempts` INTEGER NOT NULL DEFAULT 0,
+ALTER TABLE `Leads` MODIFY `attempts` INTEGER NOT NULL DEFAULT 0,
     ALTER COLUMN `updated_at` DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE `users` ALTER COLUMN `updated_at` DROP DEFAULT;
+ALTER TABLE `Users` ALTER COLUMN `updated_at` DROP DEFAULT;
 
 -- CreateTable
 CREATE TABLE `CallLog` (
