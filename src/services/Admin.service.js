@@ -170,7 +170,7 @@ module.exports.deleteCampaignService = async (id) => {
 
     // 3️⃣ Delete all call logs for these leads
     if (leadIds.length > 0) {
-      await prisma.CallLog.deleteMany({
+      await prisma.callLog.deleteMany({
         where: { lead_id: { in: leadIds } },
       });
     }
