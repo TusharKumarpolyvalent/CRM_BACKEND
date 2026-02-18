@@ -147,11 +147,47 @@ module.exports.fetchAllUsers = async (role) => {
 // };
 
 module.exports.deleteCampaignService = async (id) => {
-  // delete all leads under this campaign first
-  await prisma.Leads.deleteMany({ where: { campaign_id: id } });
+  try {
+    const campaignId = id.trim(); // ✅ Trim spaces
 
-  // then delete the campaign
-  return await prisma.Campaign.delete({ where: { id } });
+    // 1️⃣ Check if campaign exists
+    const campaign = await prisma.Campaign.findUnique({
+      where: { id: campaignId },
+    });
+    if (!campaign) {
+      const error = new Error('Campaign not found');
+      error.code = 'P2025';
+      throw error;
+    }
+
+    // 2️⃣ Find all leads under this campaign
+    const leads = await prisma.Leads.findMany({
+      where: { campaign_id: campaignId },
+      select: { id: true },
+    });
+
+    const leadIds = leads.map((l) => l.id);
+
+    // 3️⃣ Delete all call logs for these leads
+    if (leadIds.length > 0) {
+      await prisma.CallLog.deleteMany({
+        where: { lead_id: { in: leadIds } },
+      });
+    }
+
+    // 4️⃣ Delete all leads
+    await prisma.Leads.deleteMany({ where: { campaign_id: campaignId } });
+
+    // 5️⃣ Delete the campaign
+    const deletedCampaign = await prisma.Campaign.delete({
+      where: { id: campaignId },
+    });
+
+    return deletedCampaign;
+  } catch (error) {
+    console.error('❌ deleteCampaignService error:', error);
+    throw error;
+  }
 };
 
 //

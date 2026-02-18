@@ -151,13 +151,14 @@ module.exports.getLeads = async (req, res) => {
 
     const Leads = await fetchCampaignLeads(
       id,
-      assigned,
+      assigned === 'false' ? null : assigned,
       date,
       fromDate,
       toDate
     );
 
     console.log(`📊 Returning ${Leads.length} leads`);
+    console.log('Query params:', { id, assigned, date, fromDate, toDate });
 
     // ✅ success: true add करें
     res.status(200).json({
@@ -229,16 +230,16 @@ module.exports.getUser = async (req, res) => {
 
 module.exports.deleteCampaign = async (req, res) => {
   try {
-    const id = req.params.id; // <-- define id here
-    console.log('Deleting campaign with id:', id);
-
+    const id = req.params.id;
     if (!id) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Campaign id is required' });
+      return res.status(400).json({
+        success: false,
+        message: 'Campaign id is required',
+      });
     }
 
-    // call the service
+    console.log('🗑️ Deleting campaign with id:', id);
+
     const deleted = await deleteCampaignService(id);
 
     return res.status(200).json({
@@ -247,13 +248,13 @@ module.exports.deleteCampaign = async (req, res) => {
       data: deleted,
     });
   } catch (error) {
-    console.error('Delete campaign error:', error);
+    console.error('❌ deleteCampaign controller error:', error);
 
     if (error.code === 'P2025') {
-      // Prisma error when record not found
-      return res
-        .status(404)
-        .json({ success: false, message: 'Campaign not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Campaign not found',
+      });
     }
 
     return res.status(500).json({
