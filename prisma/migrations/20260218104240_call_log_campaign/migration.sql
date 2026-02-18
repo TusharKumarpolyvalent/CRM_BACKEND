@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE `CallLog` ADD COLUMN `campaign_id` VARCHAR(191) NULL;
+-- ALTER TABLE `CallLog` ADD COLUMN `campaign_id` VARCHAR(191) NULL;
 
 -- AlterTable
 ALTER TABLE `LeadRecord` ALTER COLUMN `updated_at` DROP DEFAULT;
