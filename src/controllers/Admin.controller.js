@@ -465,7 +465,7 @@ module.exports.getAgentPerformance = async (req, res) => {
     console.log('🔍 Fetching calls for agent:', { agent_id, fromDate, toDate });
 
     // ✅ FIX: "lead" use karo (lowercase L)
-    const callLogs = await prisma.CallLog.findMany({
+    const callLogs = await prisma.callLog.findMany({
       where: {
         agent_id: agent_id,
         ...(startDate && endDate
@@ -583,7 +583,7 @@ module.exports.getDailyCallCount = async (req, res) => {
     const end = new Date(date);
     end.setHours(23, 59, 59, 999);
 
-    const count = await prisma.CallLog.count({
+    const count = await prisma.callLog.count({
       where: {
         agent_id: agentId.toString(),
         called_at: {
