@@ -78,6 +78,7 @@ model CallLog {
   id        Int      @id @default(autoincrement())
   lead_id   Int
   agent_id  String
+  campaign_id String?
   called_at DateTime @default(now())
 
   lead Leads @relation(fields: [lead_id], references: [id])
