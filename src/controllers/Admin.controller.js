@@ -490,6 +490,8 @@ module.exports.getAgentPerformance = async (req, res) => {
       },
     });
 
+    // console.log('le le' callLogs);
+
     console.log(`📞 Agent ${agent_id} ne ${callLogs.length} total calls kiye`);
 
     // Campaign-wise grouping

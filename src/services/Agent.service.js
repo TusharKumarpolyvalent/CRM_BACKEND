@@ -30,7 +30,7 @@ module.exports.updateLead = async (
         reason,
       },
     });
-    await tx.CallLog.create({
+    await tx.callLog.create({
       data: {
         lead_id: id,
         agent_id: updatedLead.assigned_to,

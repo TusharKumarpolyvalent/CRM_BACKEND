@@ -77,7 +77,7 @@ module.exports.dailyCallCount = async (req, res) => {
     const end = new Date(date);
     end.setHours(23, 59, 59, 999);
 
-    const count = await prisma.CallLog.count({
+    const count = await prisma.callLog.count({
       where: {
         agent_id: agentId.toString(),
         called_at: {
