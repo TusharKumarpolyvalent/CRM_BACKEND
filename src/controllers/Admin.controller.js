@@ -453,7 +453,7 @@ module.exports.getAgentPerformance = async (req, res) => {
       });
     }
 
-    // Date range prepare karo
+    // Prepare date range if provided
     let startDate, endDate;
     if (fromDate && toDate) {
       startDate = new Date(fromDate);
@@ -464,37 +464,27 @@ module.exports.getAgentPerformance = async (req, res) => {
 
     console.log('🔍 Fetching calls for agent:', { agent_id, fromDate, toDate });
 
-    // ✅ FIX: "lead" use karo (lowercase L)
+    // Fetch call logs including lead and campaign
     const callLogs = await prisma.callLog.findMany({
       where: {
-        agent_id: agent_id,
+        agent_id,
         ...(startDate && endDate
-          ? {
-              called_at: {
-                gte: startDate,
-                lte: endDate,
-              },
-            }
+          ? { called_at: { gte: startDate, lte: endDate } }
           : {}),
       },
       include: {
         lead: {
-          // 👈 YAHAN "lead" (lowercase L)
           include: {
             Campaign: true,
           },
         },
       },
-      orderBy: {
-        called_at: 'desc',
-      },
+      orderBy: { called_at: 'desc' },
     });
 
-    // console.log('le le' callLogs);
+    console.log(`📞 Agent ${agent_id} made ${callLogs.length} calls`);
 
-    console.log(`📞 Agent ${agent_id} ne ${callLogs.length} total calls kiye`);
-
-    // Campaign-wise grouping
+    // Group by campaign
     const campaignMap = new Map();
     let totalConnected = 0;
     let totalNotConnected = 0;
@@ -502,9 +492,9 @@ module.exports.getAgentPerformance = async (req, res) => {
     let totalNotQualified = 0;
 
     callLogs.forEach((log) => {
-      // ✅ FIX: log.lead use karo (log.Lead nahi)
       const campaignName = log.lead?.Campaign?.name || 'Unknown Campaign';
-      const leadStatus = log.lead?.status || 'unknown';
+      const leadStatusRaw = log.lead?.status || 'unknown';
+      const status = leadStatusRaw.toLowerCase().trim();
 
       if (!campaignMap.has(campaignName)) {
         campaignMap.set(campaignName, {
@@ -520,38 +510,37 @@ module.exports.getAgentPerformance = async (req, res) => {
       const campaign = campaignMap.get(campaignName);
       campaign.total_call_count++;
 
-      // Status count
-      const status = (leadStatus || '').toLowerCase();
-      if (status.includes('connected') || status === 'connected') {
+      // ✅ Correct status mapping order
+      if (status === 'not connected' || status.includes('not connected')) {
+        campaign.not_connected++;
+        totalNotConnected++;
+      } else if (status === 'connected' || status.includes('connected')) {
         campaign.connected++;
         totalConnected++;
       } else if (
-        status.includes('not connected') ||
-        status === 'not connected'
-      ) {
-        campaign.not_connected++;
-        totalNotConnected++;
-      } else if (status.includes('qualified') || status === 'qualified') {
-        campaign.qualified++;
-        totalQualified++;
-      } else if (
-        status.includes('not qualified') ||
-        status === 'not qualified'
+        status === 'not qualified' ||
+        status.includes('not qualified')
       ) {
         campaign.not_qualified++;
         totalNotQualified++;
+      } else if (status === 'qualified' || status.includes('qualified')) {
+        campaign.qualified++;
+        totalQualified++;
+      } else {
+        // unknown or other status -> count as not connected by default
+        campaign.not_connected++;
+        totalNotConnected++;
       }
     });
 
     const campaignWise = Array.from(campaignMap.values());
-    const totalCalls = callLogs.length;
 
     return res.status(200).json({
       success: true,
       data: {
         campaign_wise: campaignWise,
         summary: {
-          total_calls: totalCalls,
+          total_calls: callLogs.length,
           connected: totalConnected,
           not_connected: totalNotConnected,
           qualified: totalQualified,
