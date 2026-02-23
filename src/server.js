@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-
+const verifyToken = require('./middleware/verifyToken');
 const AdminRouter = require('./routes/admin.route');
 const AgentRouter = require('./routes/agent.route');
 const { userLogin } = require('./controllers/Auth.controller');
@@ -25,11 +25,12 @@ app.use(
 app.use(bodyParser.json());
 
 // ======= ROUTES =======
-app.use('/api/admin', AdminRouter);
-app.use('/api/agent', AgentRouter);
 
 app.post('/api/login', userLogin);
-app.use('/api/activity', ActivityRouter);
+app.use('/api/admin', verifyToken, AdminRouter);
+app.use('/api/agent', verifyToken, AgentRouter);
+
+app.use('/api/activity', verifyToken, ActivityRouter);
 
 app.use('/', (req, res) => {
   res.status(200).json({
