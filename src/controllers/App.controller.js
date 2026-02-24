@@ -10,12 +10,28 @@ module.exports.getAppLead = async (req, res) => {
         message: 'Agent ID required',
       });
     }
-    const lead = await prisma.leads.findFirst({
+
+    // Define the start of today (00:00:00)
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const lead = await prisma.leads.findMany({
       where: {
         assigned_to: agentId,
-        status: {
-          equals: 'New',
-        },
+        OR: [
+          { status: 'New' },
+          {
+            AND: [
+              { reassign: { not: null } },
+              { reassign: { not: '' } },
+              {
+                last_call: {
+                  lt: startOfToday, // This checks created_at is NOT today (it's older)
+                },
+              },
+            ],
+          },
+        ],
       },
       select: {
         id: true,
@@ -24,19 +40,25 @@ module.exports.getAppLead = async (req, res) => {
         city: true,
         product: true,
         status: true,
+        reassign: true,
+        created_at: true, // Recommended to select this for verification
+      },
+      orderBy: {
+        updated_at: 'desc',
       },
     });
 
-    if (!lead) {
+    if (!lead || lead.length === 0) {
       return res.status(404).json({
-        success: false,
-        message: 'No New Lead Found',
+        success: true, // Changed to true if technically successful but empty, or keep false if business logic requires
+        message: 'No New or Reassigned Lead Found',
+        data: [],
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Lead fetched successfully',
+      message: 'Leads fetched successfully',
       data: lead,
     });
   } catch (error) {
