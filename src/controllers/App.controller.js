@@ -15,7 +15,7 @@ module.exports.getAppLead = async (req, res) => {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    const lead = await prisma.leads.findMany({
+    const lead = await prisma.leads.findFirst({
       where: {
         assigned_to: agentId,
         OR: [
