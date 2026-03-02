@@ -43,8 +43,10 @@ module.exports.getAppLead = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Lead fetched successfully',
-      data: leads[0], // 🔥 only one object
+      message: leads.length
+        ? 'Lead fetched successfully1'
+        : 'No New or Reassigned Lead Found',
+      data: leads, // 🔥 Always array
     });
   } catch (error) {
     console.error('❌ App Lead Error:', error);
