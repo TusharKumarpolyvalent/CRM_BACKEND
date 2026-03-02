@@ -11,55 +11,40 @@ module.exports.getAppLead = async (req, res) => {
       });
     }
 
-    // Define the start of today (00:00:00)
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    const lead = await prisma.leads.findFirst({
-      where: {
-        assigned_to: agentId,
-        OR: [
-          { status: 'New' },
-          {
-            AND: [
-              { reassign: { not: null } },
-              { reassign: { not: '' } },
-              {
-                last_call: {
-                  lt: startOfToday, // This checks created_at is NOT today (it's older)
-                },
-              },
-            ],
-          },
-        ],
-      },
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        city: true,
-        product: true,
-        status: true,
-        reassign: true,
-        created_at: true, // Recommended to select this for verification
-      },
-      orderBy: {
-        updated_at: 'desc',
-      },
-    });
+    const endOfToday = new Date(startOfToday);
+    endOfToday.setDate(endOfToday.getDate() + 1);
 
-    if (!lead || lead.length === 0) {
-      return res.status(404).json({
-        success: true, // Changed to true if technically successful but empty, or keep false if business logic requires
+    // ✅ Only 1 Latest Fresh Lead
+    const leads = await prisma.$queryRaw`
+      SELECT *
+      FROM Leads
+      WHERE assigned_to = ${agentId}
+      AND last_assigned_at >= ${startOfToday}
+      AND last_assigned_at < ${endOfToday}
+      AND (status = 'New' OR reassign IS NOT NULL)
+      AND (
+            last_call IS NULL
+            OR last_call < last_assigned_at
+          )
+      ORDER BY last_assigned_at DESC
+      LIMIT 1
+    `;
+
+    if (!leads || leads.length === 0) {
+      return res.status(200).json({
+        success: true,
         message: 'No New or Reassigned Lead Found',
-        data: [],
+        data: null,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Leads fetched successfully',
-      data: lead,
+      message: 'Lead fetched successfully',
+      data: leads[0], // 🔥 only one object
     });
   } catch (error) {
     console.error('❌ App Lead Error:', error);

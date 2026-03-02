@@ -229,6 +229,8 @@ module.exports.clearReassignService = async (leadId) => {
 // Admin.service.js में giveAgentToLeads function update करें:
 
 module.exports.giveAgentToLeads = async (leadIds, agentId) => {
+  const now = new Date();
+
   const leads = await prisma.Leads.findMany({
     where: { id: { in: leadIds } },
     select: { id: true, assigned_to: true },
@@ -247,17 +249,18 @@ module.exports.giveAgentToLeads = async (leadIds, agentId) => {
       where: { id: lead.id },
       data: {
         assigned_to: agentId,
+        last_assigned_at: now, // ✅🔥 YE SABSE IMPORTANT
         reassign: isFirstAssign
-          ? null // ✅ first time assign → no reassign
+          ? null
           : JSON.stringify({
               previousAgentId: lead.assigned_to,
               currentAgentId: agentId,
               currentAgentName: agent?.name || 'Unknown',
               sameAgent: isSameAgent,
               action: 'ASSIGN',
-              timestamp: new Date().toISOString(),
+              timestamp: now.toISOString(),
             }),
-        updated_at: new Date(),
+        updated_at: now,
       },
     });
   });
