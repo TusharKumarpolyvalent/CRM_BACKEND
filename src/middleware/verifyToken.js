@@ -14,8 +14,8 @@ const verifyToken = (req, res, next) => {
 
   try {
     const verified = jwt.verify(token, JWT_SECRET);
-    req.user = verified; // User ki info request mein save kar li
-    next(); // Agle step par jao
+    req.user = verified;
+    next();
   } catch (err) {
     res.status(401).json({ message: 'Invalid or Expired Token' });
   }

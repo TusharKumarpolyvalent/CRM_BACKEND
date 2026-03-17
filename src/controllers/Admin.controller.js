@@ -444,7 +444,7 @@ module.exports.getCampaignPerformance = async (req, res) => {
 // Admin.controller.js mein getAgentPerformance function replace karo
 module.exports.getAgentPerformance = async (req, res) => {
   try {
-    const { agent_id, fromDate, toDate } = req.query;
+    const { agent_id, fromDate, toDate, source } = req.query;
 
     if (!agent_id) {
       return res.status(400).json({
@@ -493,12 +493,15 @@ module.exports.getAgentPerformance = async (req, res) => {
 
     callLogs.forEach((log) => {
       const campaignName = log.lead?.Campaign?.name || 'Unknown Campaign';
+      const source = log.lead?.source || 'Unknown Source';
       const leadStatusRaw = log.lead?.status || 'unknown';
       const status = leadStatusRaw.toLowerCase().trim();
 
-      if (!campaignMap.has(campaignName)) {
-        campaignMap.set(campaignName, {
+      const key = `${campaignName}-${source}`;
+      if (!campaignMap.has(key)) {
+        campaignMap.set(key, {
           campaign_name: campaignName,
+          source: source,
           total_call_count: 0,
           connected: 0,
           not_connected: 0,
@@ -507,7 +510,7 @@ module.exports.getAgentPerformance = async (req, res) => {
         });
       }
 
-      const campaign = campaignMap.get(campaignName);
+      const campaign = campaignMap.get(key);
       campaign.total_call_count++;
 
       // ✅ Correct status mapping order

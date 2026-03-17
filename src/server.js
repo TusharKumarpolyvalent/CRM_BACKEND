@@ -31,9 +31,7 @@ app.post('/api/login', userLogin);
 app.use('/api/admin', verifyToken, AdminRouter);
 app.use('/api/agent', verifyToken, AgentRouter);
 app.use('/api/app', AppRouter);
-app.get('/test', (req, res) => {
-  res.send('Test route working');
-});
+
 app.use('/api/activity', verifyToken, ActivityRouter);
 
 app.use('/', (req, res) => {
