@@ -389,44 +389,82 @@ module.exports.getCampaignPerformance = async (req, res) => {
 
     const where = { campaign_id };
 
+    // Date filter
     if (fromDate && toDate) {
-      // Parse YYYY-MM-DD as local date to avoid timezone shift
-      const [fy, fm, fd] = fromDate.split('-').map((v) => Number(v));
-      const [ty, tm, td] = toDate.split('-').map((v) => Number(v));
+      const [fy, fm, fd] = fromDate.split('-').map(Number);
+      const [ty, tm, td] = toDate.split('-').map(Number);
 
       const start = new Date(fy, fm - 1, fd);
       start.setHours(0, 0, 0, 0);
+
       const end = new Date(ty, tm - 1, td);
       end.setHours(23, 59, 59, 999);
+
       where.last_call = { gte: start, lte: end };
     }
 
-    // Prisma fetch
     const leads = await prisma.Leads.findMany({
       where,
       select: {
         source: true,
-        status: true, // status = 'qualified' / 'unqualified'
+        status: true,
       },
     });
 
-    // Group by source
     const performance = {};
+
     leads.forEach((lead) => {
       const src = lead.source || 'Unknown';
-      if (!performance[src]) performance[src] = { total: 0, qualified: 0 };
-      performance[src].total += 1;
-      if (lead.status && lead.status.toLowerCase() === 'qualified')
-        performance[src].qualified += 1;
+      const status = (lead.status || '').toLowerCase().trim();
+
+      if (!performance[src]) {
+        performance[src] = {
+          total: 0,
+          connected: 0,
+          not_connected: 0,
+          qualified: 0,
+          not_qualified: 0,
+          no_status: 0,
+        };
+      }
+
+      const data = performance[src];
+      data.total++;
+
+      // ✅ Proper status mapping
+      if (status.includes('not connected')) {
+        data.not_connected++;
+      } else if (status.includes('connected')) {
+        data.connected++;
+      } else if (status.includes('not qualified')) {
+        data.not_qualified++;
+      } else if (status.includes('qualified')) {
+        data.qualified++;
+      } else {
+        data.no_status++;
+      }
     });
 
     const result = Object.keys(performance).map((source) => {
-      const { total, qualified } = performance[source];
+      const d = performance[source];
+
       return {
         source_name: source,
-        total_leads: total,
-        total_qualified: qualified,
-        qualified_percent: total ? Math.round((qualified / total) * 100) : 0,
+        total_leads: d.total,
+
+        connected: d.connected,
+        not_connected: d.not_connected,
+        qualified: d.qualified,
+        not_qualified: d.not_qualified,
+        no_status: d.no_status,
+
+        // optional %
+        connected_percent: d.total
+          ? Math.round((d.connected / d.total) * 100)
+          : 0,
+        qualified_percent: d.total
+          ? Math.round((d.qualified / d.total) * 100)
+          : 0,
       };
     });
 
@@ -437,7 +475,10 @@ module.exports.getCampaignPerformance = async (req, res) => {
     });
   } catch (err) {
     console.error('❌ getCampaignPerformance error:', err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 

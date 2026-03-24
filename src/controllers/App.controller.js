@@ -19,19 +19,19 @@ module.exports.getAppLead = async (req, res) => {
 
     // ✅ Only 1 Latest Fresh Lead
     const leads = await prisma.$queryRaw`
-      SELECT *
-      FROM Leads
-      WHERE assigned_to = ${agentId}
-      AND last_assigned_at >= ${startOfToday}
-      AND last_assigned_at < ${endOfToday}
-      AND (status = 'New' OR reassign IS NOT NULL)
-      AND (
-            last_call IS NULL
-            OR last_call < last_assigned_at
-          )
-      ORDER BY last_assigned_at DESC
-      LIMIT 1
-    `;
+  SELECT *
+  FROM Leads
+  WHERE assigned_to = ${agentId}
+  AND last_assigned_at >= ${startOfToday}
+  AND last_assigned_at < ${endOfToday}
+  AND (status = 'New' OR reassign IS NOT NULL)
+  AND (
+        last_call IS NULL
+        OR last_call < last_assigned_at
+      )
+  ORDER BY last_assigned_at DESC, name ASC
+  LIMIT 1
+`;
 
     if (!leads || leads.length === 0) {
       return res.status(200).json({
