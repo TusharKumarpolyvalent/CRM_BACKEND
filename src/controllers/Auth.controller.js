@@ -1,8 +1,10 @@
+require('dotenv').config();
+
 const jwt = require('jsonwebtoken');
 const { findUser } = require('../services/Auth.service');
 
 // Secret key ko .env mein hona chahiye, lekin abhi testing ke liye yahan rakh sakte hain
-const JWT_SECRET = 'process.env.JWT_SECRET';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 module.exports.userLogin = async (req, res) => {
   try {
@@ -27,7 +29,7 @@ module.exports.userLogin = async (req, res) => {
           name: loggedInUser.name,
         },
         JWT_SECRET,
-        { expiresIn: '24h' } // Token 24 ghante tak valid rahega
+        { expiresIn: '7d' } // Token 24 ghante tak valid rahega
       );
 
       // 4. Token aur User data saath mein bhejein
