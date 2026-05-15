@@ -17,19 +17,27 @@ module.exports.updateLead = async (
   { status, remark, lastcall, attempt, docStatus, reason }
 ) => {
   return await prisma.$transaction(async (tx) => {
-    // 1️⃣ Update Leads table (attempts UNLIMITED)
+    const currentLead = await tx.Leads.findUnique({ where: { id } });
+    const currentAttempts = currentLead?.attempts ?? 0;
+    const attemptsAfter = currentAttempts + 1;
+
+    // 🔥 10 Attempts Limit Check
+    if (attemptsAfter > 10) {
+      throw new Error('Maximum attempts limit reached (10)');
+    }
+
     const updatedLead = await tx.Leads.update({
       where: { id },
       data: {
         status,
         remarks: remark,
         attempts: { increment: 1 },
-
         last_call: lastcall,
         doc_status: docStatus,
         reason,
       },
     });
+
     await tx.callLog.create({
       data: {
         lead_id: id,
@@ -38,31 +46,30 @@ module.exports.updateLead = async (
       },
     });
 
-    // 2️⃣ Update Leadrecord (LATEST 3 ONLY)
+    // 🔥 Dynamic keys for current attempt (e.g., status4, remark4)
+    const statusField = `status${attemptsAfter}`;
+    const remarkField = `remark${attemptsAfter}`;
+
     const existingRecord = await tx.Leadrecord.findUnique({
       where: { id: id.toString() },
     });
 
     if (existingRecord) {
+      // 🚀 Record exists: Prisma automatically updates 'updated_at' here. 'created_at' remains intact.
       await tx.Leadrecord.update({
         where: { id: id.toString() },
         data: {
-          status3: existingRecord.status2,
-          remark3: existingRecord.remark2,
-
-          status2: existingRecord.status1,
-          remark2: existingRecord.remark1,
-
-          status1: status,
-          remark1: remark,
+          [statusField]: status,
+          [remarkField]: remark,
         },
       });
     } else {
+      // 🚀 First attempt: Both 'created_at' and 'updated_at' will be the exact same time.
       await tx.Leadrecord.create({
         data: {
           id: id.toString(),
-          status1: status,
-          remark1: remark,
+          [statusField]: status,
+          [remarkField]: remark,
         },
       });
     }
@@ -96,66 +103,61 @@ module.exports.createLeadrecord = async (data) => {
 
 module.exports.updateLeads = async (leadId, data) => {
   try {
-    console.log('updateLeads service called:', { leadId, data });
-
     return await prisma.$transaction(async (tx) => {
-      // Update Leads table
       const updateData = {
         status: data.status,
         remarks: data.remarks || data.remark,
         reason: data.reason,
         last_call: new Date(),
       };
+
       if (data.city) updateData.city = data.city;
       if (data.pincode) updateData.pincode = data.pincode;
       if (data.name) updateData.name = data.name;
+      if (data.followupAt) updateData.followup_at = new Date(data.followupAt);
 
-      // Add followup_at if provided
-      if (data.followupAt) {
-        updateData.followup_at = new Date(data.followupAt);
-      }
-
-      // Increment attempts
       const currentLead = await tx.Leads.findUnique({
         where: { id: leadId },
       });
 
-      if (currentLead) {
-        updateData.attempts = {
-          increment: 1,
-        };
+      const currentAttempts = currentLead?.attempts ?? 0;
+      const attemptsAfter = currentAttempts + 1;
+
+      // 🔥 10 Attempts Limit Check
+      if (attemptsAfter > 10) {
+        throw new Error('Maximum attempts limit reached (10)');
       }
+
+      updateData.attempts = { increment: 1 };
 
       const updatedLead = await tx.Leads.update({
         where: { id: leadId },
         data: updateData,
       });
 
-      // Update Leadrecord (latest 3 records logic)
+      // 🔥 Dynamic keys based on attempt number
+      const statusField = `status${attemptsAfter}`;
+      const remarkField = `remark${attemptsAfter}`;
+
       const existingRecord = await tx.Leadrecord.findUnique({
         where: { id: leadId.toString() },
       });
 
       if (existingRecord) {
+        // 🚀 Prisma updates 'updated_at' here automatically
         await tx.Leadrecord.update({
           where: { id: leadId.toString() },
           data: {
-            status3: existingRecord.status2,
-            remark3: existingRecord.remark2,
-
-            status2: existingRecord.status1,
-            remark2: existingRecord.remark1,
-
-            status1: data.status,
-            remark1: data.remarks || data.remark,
+            [statusField]: data.status,
+            [remarkField]: data.remarks || data.remark,
           },
         });
       } else {
         await tx.Leadrecord.create({
           data: {
             id: leadId.toString(),
-            status1: data.status,
-            remark1: data.remarks || data.remark,
+            [statusField]: data.status,
+            [remarkField]: data.remarks || data.remark,
           },
         });
       }

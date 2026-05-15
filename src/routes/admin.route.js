@@ -16,6 +16,7 @@ const {
   getCampaignPerformance,
   getAgentPerformance,
   getDailyCallCount,
+  updateCampaignId,
 } = require('../controllers/Admin.controller');
 
 const AdminRouter = express.Router();
@@ -36,6 +37,7 @@ AdminRouter.post('/checked-client-lead/:id', checkedClientLead);
 AdminRouter.get('/campaign-performance', getCampaignPerformance);
 AdminRouter.get('/agent-performance', getAgentPerformance);
 AdminRouter.get('/daily-call-count', getDailyCallCount);
+AdminRouter.put('/update-campaign/:id', updateCampaignId);
 
 AdminRouter.delete('/delete-campaign/:id', deleteCampaign);
 

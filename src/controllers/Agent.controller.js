@@ -26,9 +26,6 @@ module.exports.fetchAgentLeads = async (req, res) => {
   }
 };
 
-// agent.controller.js में
-// agent.controller.js में leadFollowUp function update करें
-
 module.exports.updateLeadAddress = async (req, res) => {
   try {
     const { leadId } = req.params;
@@ -195,7 +192,8 @@ module.exports.updateLeadDetails = async (req, res) => {
     // Use updateLead function with correct parameters
     const updatedLead = await updateLead(parseInt(leadId), {
       status,
-      remark: remarks || '',
+      // UI se "remark" bhej raha hai (AgentDashboard), isliye fallback required hai
+      remark: remarks ?? req.body.remark ?? '',
       lastcall: new Date(),
       docStatus: 'review',
       reason,

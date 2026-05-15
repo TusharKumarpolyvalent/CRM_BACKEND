@@ -12,6 +12,7 @@ const {
   updateCheckedClientLead,
   updateReassignService,
   clearReassignService,
+  updateCampaignIdService,
 } = require('../services/Admin.service');
 
 module.exports.addCampaign = async (req, res) => {
@@ -139,7 +140,7 @@ module.exports.importLeads = async (req, res) => {
 
 module.exports.getLeads = async (req, res) => {
   try {
-    const { id, assigned, date, fromDate, toDate } = req.query;
+    const { id, assigned, date, fromDate, toDate, page, pageSize } = req.query;
 
     console.log('🚀 GET /get-leads API Called with:', {
       id,
@@ -149,22 +150,27 @@ module.exports.getLeads = async (req, res) => {
       toDate,
     });
 
-    const Leads = await fetchCampaignLeads(
+    const pageNum = page ? Number(page) : 1;
+    const pageSizeNum = pageSize ? Number(pageSize) : 30;
+
+    const { result, total } = await fetchCampaignLeads(
       id,
       assigned === 'false' ? null : assigned,
       date,
       fromDate,
-      toDate
+      toDate,
+      pageNum,
+      pageSizeNum
     );
 
-    console.log(`📊 Returning ${Leads.length} leads`);
+    console.log(`📊 Returning ${result.length} leads`);
     console.log('Query params:', { id, assigned, date, fromDate, toDate });
 
-    // ✅ success: true add करें
     res.status(200).json({
-      success: true, // ❗ यह line add करें
+      success: true,
       message: 'Leads fetched successfully',
-      data: Leads,
+      data: result,
+      totalCount: total,
     });
   } catch (err) {
     console.error('❌ Error in getLeads:', err);
@@ -286,7 +292,6 @@ module.exports.checkedClientLead = async (req, res) => {
     });
   }
 };
-// Admin.controller.js में नीचे checkedClientLead के बाद add करें
 
 module.exports.updateReassign = async (req, res) => {
   try {
@@ -330,9 +335,6 @@ module.exports.clearReassign = async (req, res) => {
   }
 };
 
-// assignAgent function को update करें
-// Admin.controller.js में assignAgent function को एक ही बार रखें:
-
 module.exports.assignAgent = async (req, res) => {
   try {
     const { agentId } = req.params;
@@ -353,7 +355,6 @@ module.exports.assignAgent = async (req, res) => {
       parsedLeadIds = leadIds; // If it's already an array
     }
 
-    // अब giveAgentToLeads को reassignData भी pass करें
     const assignedLeads = await giveAgentToLeads(
       parsedLeadIds,
       agentId,
@@ -637,6 +638,32 @@ module.exports.getDailyCallCount = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Error fetching daily call count',
+    });
+  }
+};
+
+module.exports.updateCampaignId = async (req, res) => {
+  try {
+    const { oldId, NewId } = req.body;
+    if (!oldId || !NewId) {
+      return res.status(400).json({
+        success: false,
+        message: 'oldId and NewId are required',
+      });
+    }
+    const response = await updateCampaignIdService(oldId, NewId);
+    console.log('OLD ID:', oldId, 'NEW ID:', NewId); // Ye server console mein check karein
+    return res.status(200).json({
+      success: true,
+      message: 'Campaign ID updated successfully',
+      data: response,
+    });
+  } catch (error) {
+    console.error('❌ updateCampaignId error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update Campaign ID',
+      error: error.message,
     });
   }
 };

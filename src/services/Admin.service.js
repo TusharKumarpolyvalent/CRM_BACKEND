@@ -25,7 +25,9 @@ module.exports.fetchCampaignLeads = async (
   assigned,
   date,
   fromDate,
-  toDate
+  toDate,
+  page = 1,
+  pageSize = 30
 ) => {
   console.log('📥 fetchCampaignLeads called with:', {
     id,
@@ -102,13 +104,23 @@ module.exports.fetchCampaignLeads = async (
 
   console.log('🔍 Final Prisma where clause:', JSON.stringify(where, null, 2));
 
-  const result = await prisma.Leads.findMany({
-    where,
-    orderBy: { created_at: 'desc' },
-  });
+  const skip = (page - 1) * pageSize;
 
-  console.log(`✅ Found ${result.length} leads`);
-  return result;
+  const [total, result] = await Promise.all([
+    prisma.Leads.count({ where }),
+    prisma.Leads.findMany({
+      where,
+      orderBy: { created_at: 'desc' },
+      skip,
+      take: pageSize,
+    }),
+  ]);
+
+  console.log(
+    `✅ Found ${result.length} leads (page ${page}/${Math.ceil(total / pageSize)})`
+  );
+
+  return { result, total };
 };
 
 module.exports.createUser = async (userData) => {
@@ -266,4 +278,20 @@ module.exports.giveAgentToLeads = async (leadIds, agentId) => {
   });
 
   return Promise.all(updates);
+};
+
+module.exports.updateCampaignIdService = async (oldId, newId) => {
+  return await prisma.$transaction(async (tx) => {
+    const updatedCampaign = await tx.Campaign.update({
+      where: { id: oldId },
+      data: { id: newId },
+    });
+
+    await tx.Leads.updateMany({
+      where: { campaign_id: oldId },
+      data: { campaign_id: newId },
+    });
+
+    return updatedCampaign;
+  });
 };

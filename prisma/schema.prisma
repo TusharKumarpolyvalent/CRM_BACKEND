@@ -35,11 +35,27 @@ model Leadrecord {
   status1    String?
   status2    String?
   status3    String?
+  status4    String?
+  status5    String?
+  status6    String?
+  status7    String?
+  status8    String?
+  status9    String?
+  status10   String?
+  
   remark1    String?
   remark2    String?
   remark3    String?
+  remark4    String?
+  remark5    String?
+  remark6    String?
+  remark7    String?
+  remark8    String?
+  remark9    String?
+  remark10   String?
+  
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  updated_at DateTime @updatedAt // 🔥 Prisma इसे automatically update करेगा जब भी record update होगा
 
   @@map("LeadRecord")
 }
